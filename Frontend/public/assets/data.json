@@ -1,0 +1,161 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Paracetamol 500mg",
+      "price": 25000,
+      "category": "Thuốc giảm đau",
+      "description": "Thuốc giảm đau, hạ sốt hiệu quả",
+      "rating": 4.5,
+      "reviews": 125,
+      "stock": 50
+    },
+    {
+      "id": 2,
+      "name": "Vitamin C 1000mg",
+      "price": 150000,
+      "category": "Thực phẩm chức năng",
+      "description": "Tăng cường sức đề kháng cho cơ thể",
+      "rating": 4.7,
+      "reviews": 200,
+      "stock": 80
+    },
+    {
+      "id": 3,
+      "name": "Omega-3 Fish Oil",
+      "price": 320000,
+      "category": "Thực phẩm chức năng",
+      "description": "Dầu cá Omega-3 giúp bảo vệ tim mạch",
+      "rating": 4.8,
+      "reviews": 89,
+      "stock": 30
+    },
+    {
+      "id": 4,
+      "name": "Thuốc ho Bảo Thanh",
+      "price": 45000,
+      "category": "Thuốc ho",
+      "description": "Thuốc ho giúp làm dịu cổ họng",
+      "rating": 4.3,
+      "reviews": 110,
+      "stock": 60
+    },
+    {
+      "id": 5,
+      "name": "Gel rửa tay khô",
+      "price": 35000,
+      "category": "Sản phẩm y tế",
+      "description": "Gel rửa tay khô tiện lợi, diệt khuẩn nhanh chóng",
+      "rating": 4.6,
+      "reviews": 100,
+      "stock": 120
+    },
+    {
+      "id": 6,
+      "name": "Máy đo huyết áp Omron",
+      "price": 1200000,
+      "category": "Thiết bị y tế",
+      "description": "Máy đo huyết áp chất lượng cao, dễ sử dụng",
+      "rating": 4.9,
+      "reviews": 45,
+      "stock": 15
+    }
+  ],
+  
+  "categories": [
+    "all",
+    "Thuốc giảm đau",
+    "Thực phẩm chức năng",
+    "Sản phẩm y tế",
+    "Thuốc ho",
+    "Chăm sóc da",
+    "Thuốc tiêu hóa"
+  ],
+
+  "sampleAccounts": [
+    {
+      "name": "Nguyễn Văn A",
+      "email": "customer@longchau.com",
+      "password": "123456",
+      "role": "Customer"
+    },
+    {
+      "name": "Nguyễn Văn B",
+      "email": "doctor@longchau.com",
+      "password": "123456",
+      "role": "Doctor"
+    },
+    {
+      "name": "Nguyễn Văn C",
+      "email": "admin@longchau.com",
+      "password": "123456",
+      "role": "Admin"
+    },
+    {
+      "name": "Nguyễn Văn D",
+      "email": "pharmacist@longchau.com",
+      "password": "123456",
+      "role": "Pharmacist"
+    },
+    {
+      "name": "Nguyễn Văn E",
+      "email": "manager@longchau.com",
+      "password": "123456",
+      "role": "Manager"
+    }
+  ],
+
+  "orders": [
+    {
+      "id": "LC202501001",
+      "date": "2025-01-20",
+      "status": "delivered",
+      "total": 205000,
+      "itemCount": 3,
+      "items": [
+        { "id": 1, "name": "Paracetamol 500mg", "quantity": 2, "price": 25000, "image": "/placeholder.svg" },
+        { "id": 2, "name": "Vitamin C 1000mg", "quantity": 1, "price": 150000, "image": "/placeholder.svg" },
+        { "id": 5, "name": "Gel rửa tay khô", "quantity": 1, "price": 35000, "image": "/placeholder.svg" }
+      ],
+      "shippingAddress": "123 Nguyễn Trãi, Quận 1, TP.HCM",
+      "paymentMethod": "Thanh toán khi nhận hàng"
+    },
+    {
+      "id": "LC202501002",
+      "date": "2025-01-22",
+      "status": "shipping",
+      "total": 320000,
+      "itemCount": 1,
+      "items": [
+        { "id": 3, "name": "Omega-3 Fish Oil", "quantity": 1, "price": 320000, "image": "/placeholder.svg" }
+      ],
+      "shippingAddress": "456 Lê Văn Sỹ, Quận 3, TP.HCM",
+      "paymentMethod": "Thẻ tín dụng"
+    },
+    {
+      "id": "LC202501003",
+      "date": "2025-01-25",
+      "status": "confirmed",
+      "total": 1200000,
+      "itemCount": 1,
+      "items": [
+        { "id": 6, "name": "Máy đo huyết áp Omron", "quantity": 1, "price": 1200000, "image": "/placeholder.svg" }
+      ],
+      "shippingAddress": "789 Cách Mạng Tháng 8, Quận 10, TP.HCM",
+      "paymentMethod": "Thẻ tín dụng"
+    },
+    {
+      "id": "LC202501004",
+      "date": "2025-01-26",
+      "status": "pending",
+      "total": 95000,
+      "itemCount": 2,
+      "items": [
+        { "id": 4, "name": "Thuốc ho Bảo Thanh", "quantity": 1, "price": 45000, "image": "/placeholder.svg" },
+        { "id": 1, "name": "Paracetamol 500mg", "quantity": 2, "price": 25000, "image": "/placeholder.svg" }
+      ],
+      "shippingAddress": "321 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM",
+      "paymentMethod": "Thanh toán khi nhận hàng"
+    }
+  ]
+}

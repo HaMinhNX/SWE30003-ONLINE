@@ -1,0 +1,124 @@
+/* NavBar.css */
+
+/* Basic styling for Navbar */
+.navbar {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+}
+
+/* Navbar container */
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Logo */
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.navbar-logo-text {
+  font-size: 24px;
+  font-weight: bold;
+  background-color: #007BFF;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 8px;
+}
+
+.navbar-logo-name {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-left: 10px;
+}
+
+/* Desktop Navigation Links */
+.navbar-links.desktop {
+  display: flex;
+  gap: 20px;
+}
+
+.navbar-link {
+  font-size: 16px;
+  font-weight: medium;
+  color: #333;
+  text-decoration: none;
+  padding: 8px 15px;
+  transition: color 0.3s ease;
+}
+
+.navbar-link:hover {
+  color: #007BFF;
+}
+
+/* Auth Section (Login/Register) */
+.navbar-auth.desktop {
+  display: flex;
+  gap: 20px;
+}
+
+.navbar-auth-link {
+  font-size: 16px;
+  color: #333;
+  text-decoration: none;
+  padding: 8px 15px;
+  transition: color 0.3s ease;
+}
+
+.navbar-auth-link:hover {
+  color: #007BFF;
+}
+
+/* Mobile Menu Button */
+.navbar-mobile-menu {
+  display: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+}
+
+.navbar-mobile-menu:hover {
+  background-color: #f0f0f0;
+}
+
+/* Mobile Navigation Links */
+.navbar-links.mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px;
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navbar-links.desktop {
+    display: none;
+  }
+
+  .navbar-auth.desktop {
+    display: none;
+  }
+
+  .navbar-mobile-menu {
+    display: block;
+  }
+}

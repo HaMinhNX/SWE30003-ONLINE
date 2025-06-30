@@ -1,27 +1,26 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
-import Home from './pages/home.jsx'
-import Doctor from './pages/doctor.jsx'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Home from './pages/home.jsx';
+import Products from './pages/Products.jsx';
+import Navbar from './components/navBar.jsx'; // Đảm bảo đường dẫn đúng
+import OrderHistory from './pages/OrderHistory.jsx'
+import './App.css'; // Nếu có file CSS chính cho toàn ứng dụng
 
 function App() {
   return (
     <Router>
       <div>
-        <nav className="navbar">
-          <h2 style={{ margin: 0 }}>Long Châu Pharmacy</h2>
-          <div>
-            <Link to="/" style={{ color: 'white', marginRight: '1rem' }}>Trang chủ</Link>
-            <Link to="/doctor" style={{ color: 'white' }}>Bác sĩ</Link>
-          </div>
-        </nav>
+        {/* Navbar sticky */}
+        <Navbar />
 
+        {/* Nội dung các trang */}
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/doctor" element={<Doctor />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/order-history" element={<OrderHistory />} />
         </Routes>
       </div>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;
