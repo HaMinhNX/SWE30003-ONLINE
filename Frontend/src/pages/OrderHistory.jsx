@@ -1,26 +1,74 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Package, Clock, CheckCircle, XCircle, Truck, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const OrderHistory = () => {
   const [selectedTab, setSelectedTab] = useState('all');
-  const [orders, setOrders] = useState([]);
 
-  useEffect(() => {
-    // Lấy dữ liệu từ file JSON
-    fetch('/assets/data.json') // Đảm bảo đường dẫn đúng
-      .then(response => response.json())
-      .then(data => {
-        setOrders(data.orders);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
-  }, []);
+  const orders = [
+    {
+      id: 'LC202501001',
+      date: '2025-01-20',
+      status: 'delivered',
+      total: 205000,
+      itemCount: 3,
+      items: [
+        { id: 1, name: 'Paracetamol 500mg', quantity: 2, price: 25000, image: '/placeholder.svg' },
+        { id: 2, name: 'Vitamin C 1000mg', quantity: 1, price: 150000, image: '/placeholder.svg' },
+        { id: 5, name: 'Gel rửa tay khô', quantity: 1, price: 35000, image: '/placeholder.svg' }
+      ],
+      shippingAddress: '123 Nguyễn Trãi, Quận 1, TP.HCM',
+      paymentMethod: 'Thanh toán khi nhận hàng'
+    },
+    {
+      id: 'LC202501002',
+      date: '2025-01-22',
+      status: 'shipping',
+      total: 320000,
+      itemCount: 1,
+      items: [
+        { id: 3, name: 'Omega-3 Fish Oil', quantity: 1, price: 320000, image: '/placeholder.svg' }
+      ],
+      shippingAddress: '456 Lê Văn Sỹ, Quận 3, TP.HCM',
+      paymentMethod: 'Thẻ tín dụng'
+    },
+    {
+      id: 'LC202501003',
+      date: '2025-01-25',
+      status: 'confirmed',
+      total: 1200000,
+      itemCount: 1,
+      items: [
+        { id: 6, name: 'Máy đo huyết áp Omron', quantity: 1, price: 1200000, image: '/placeholder.svg' }
+      ],
+      shippingAddress: '789 Cách Mạng Tháng 8, Quận 10, TP.HCM',
+      paymentMethod: 'Thẻ tín dụng'
+    },
+    {
+      id: 'LC202501004',
+      date: '2025-01-26',
+      status: 'pending',
+      total: 95000,
+      itemCount: 2,
+      items: [
+        { id: 4, name: 'Thuốc ho Bảo Thanh', quantity: 1, price: 45000, image: '/placeholder.svg' },
+        { id: 1, name: 'Paracetamol 500mg', quantity: 2, price: 25000, image: '/placeholder.svg' }
+      ],
+      shippingAddress: '321 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM',
+      paymentMethod: 'Thanh toán khi nhận hàng'
+    }
+  ];
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'VND',
+      currency: 'VND'
     }).format(price);
   };
 
@@ -28,7 +76,7 @@ const OrderHistory = () => {
     return new Date(dateString).toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric',
+      day: 'numeric'
     });
   };
 
@@ -38,31 +86,37 @@ const OrderHistory = () => {
         return {
           label: 'Chờ xác nhận',
           color: 'bg-yellow-100 text-yellow-800',
+          icon: Clock
         };
       case 'confirmed':
         return {
           label: 'Đã xác nhận',
           color: 'bg-blue-100 text-blue-800',
+          icon: CheckCircle
         };
       case 'shipping':
         return {
           label: 'Đang giao hàng',
           color: 'bg-purple-100 text-purple-800',
+          icon: Truck
         };
       case 'delivered':
         return {
           label: 'Đã giao hàng',
           color: 'bg-green-100 text-green-800',
+          icon: Package
         };
       case 'cancelled':
         return {
           label: 'Đã hủy',
           color: 'bg-red-100 text-red-800',
+          icon: XCircle
         };
       default:
         return {
           label: 'Không xác định',
           color: 'bg-gray-100 text-gray-800',
+          icon: Clock
         };
     }
   };
@@ -77,150 +131,158 @@ const OrderHistory = () => {
   if (!user.isLoggedIn) {
     return (
       <div className="min-h-screen bg-gray-50">
+        <Navbar />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
-            <div className="w-24 h-24 text-gray-300 mx-auto mb-4">📦</div>
+            <Package className="w-24 h-24 text-gray-300 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Bạn chưa đăng nhập</h2>
             <p className="text-gray-600 mb-8">Vui lòng đăng nhập để xem lịch sử mua hàng</p>
-            <button className="bg-primary hover:bg-primary/90 px-8 py-4 text-lg text-white">
+            <Button asChild className="bg-primary hover:bg-primary/90">
               <Link to="/login">
                 Đăng nhập
               </Link>
-            </button>
+            </Button>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Lịch sử mua hàng</h1>
           <p className="text-gray-600">Theo dõi các đơn hàng của bạn tại Long Châu</p>
         </div>
 
-        {/* Tab navigation */}
-        <div className="mb-8 flex gap-4">
-          <button
-            className={`px-4 py-2 ${selectedTab === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => setSelectedTab('all')}
-          >
-            Tất cả
-          </button>
-          <button
-            className={`px-4 py-2 ${selectedTab === 'pending' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => setSelectedTab('pending')}
-          >
-            Chờ xác nhận
-          </button>
-          <button
-            className={`px-4 py-2 ${selectedTab === 'confirmed' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => setSelectedTab('confirmed')}
-          >
-            Đã xác nhận
-          </button>
-          <button
-            className={`px-4 py-2 ${selectedTab === 'shipping' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => setSelectedTab('shipping')}
-          >
-            Đang giao
-          </button>
-          <button
-            className={`px-4 py-2 ${selectedTab === 'delivered' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => setSelectedTab('delivered')}
-          >
-            Đã giao
-          </button>
-          <button
-            className={`px-4 py-2 ${selectedTab === 'cancelled' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => setSelectedTab('cancelled')}
-          >
-            Đã hủy
-          </button>
-        </div>
+        {/* Tabs */}
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-8">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="all">Tất cả</TabsTrigger>
+            <TabsTrigger value="pending">Chờ xác nhận</TabsTrigger>
+            <TabsTrigger value="confirmed">Đã xác nhận</TabsTrigger>
+            <TabsTrigger value="shipping">Đang giao</TabsTrigger>
+            <TabsTrigger value="delivered">Đã giao</TabsTrigger>
+            <TabsTrigger value="cancelled">Đã hủy</TabsTrigger>
+          </TabsList>
+        </Tabs>
 
-        {/* Order list */}
+        {/* Danh sách đơn hàng */}
         {filteredOrders.length === 0 ? (
           <div className="text-center py-12">
-            <div className="w-24 h-24 text-gray-300 mx-auto mb-4">📦</div>
+            <Package className="w-24 h-24 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Không có đơn hàng nào</h3>
             <p className="text-gray-600 mb-8">Bạn chưa có đơn hàng nào trong danh mục này</p>
-            <button className="bg-primary hover:bg-primary/90 px-8 py-4 text-lg text-white">
+            <Button asChild className="bg-primary hover:bg-primary/90">
               <Link to="/products">
                 Tiếp tục mua sắm
               </Link>
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="space-y-6">
             {filteredOrders.map((order) => {
               const statusInfo = getStatusInfo(order.status);
-
+              const StatusIcon = statusInfo.icon;
+              
               return (
-                <div key={order.id} className="border p-6 rounded-lg shadow-md hover:shadow-xl">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                      <div className="text-lg font-semibold">Đơn hàng #{order.id}</div>
-                      <span className={`px-3 py-1 rounded-full ${statusInfo.color}`}>{statusInfo.label}</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm text-gray-500">{formatDate(order.date)}</div>
-                      <div className="text-lg font-bold text-primary">
-                        {formatPrice(order.total)}
+                <Card key={order.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <CardTitle className="text-lg">Đơn hàng #{order.id}</CardTitle>
+                        <Badge className={statusInfo.color}>
+                          <StatusIcon className="w-3 h-3 mr-1" />
+                          {statusInfo.label}
+                        </Badge>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-gray-500">{formatDate(order.date)}</div>
+                        <div className="text-lg font-bold text-primary">
+                          {formatPrice(order.total)}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </CardHeader>
+                  
+                  <CardContent>
+                    {/* Thông tin đơn hàng */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">Địa chỉ giao hàng</h4>
+                        <p className="text-gray-600 text-sm">{order.shippingAddress}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">Phương thức thanh toán</h4>
+                        <p className="text-gray-600 text-sm">{order.paymentMethod}</p>
+                      </div>
+                    </div>
 
-                  {/* Order details */}
-                  <div className="mt-4">
-                    <h4 className="font-medium text-gray-900 mb-2">Địa chỉ giao hàng</h4>
-                    <p className="text-gray-600 text-sm">{order.shippingAddress}</p>
-                    <h4 className="font-medium text-gray-900 mt-4">Phương thức thanh toán</h4>
-                    <p className="text-gray-600 text-sm">{order.paymentMethod}</p>
-                  </div>
-
-                  {/* Items */}
-                  <div className="mt-4">
-                    <h4 className="font-medium text-gray-900 mb-2">Sản phẩm ({order.itemCount} sản phẩm)</h4>
-                    <div className="space-y-4">
-                      {order.items.map((item) => (
-                        <div key={item.id} className="flex justify-between items-center">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                    {/* Danh sách sản phẩm */}
+                    <div className="border-t pt-4">
+                      <h4 className="font-medium text-gray-900 mb-3">
+                        Sản phẩm ({order.itemCount} sản phẩm)
+                      </h4>
+                      <div className="space-y-3">
+                        {order.items.map((item) => (
+                          <div key={item.id} className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                               <div className="text-lg text-gray-300">📦</div>
                             </div>
-                            <div>
-                              <Link to={`/product/${item.id}`} className="font-medium text-gray-900 hover:text-primary">
+                            <div className="flex-1">
+                              <Link 
+                                to={`/product/${item.id}`}
+                                className="font-medium text-gray-900 hover:text-primary"
+                              >
                                 {item.name}
                               </Link>
                               <div className="text-sm text-gray-500">
                                 Số lượng: {item.quantity} x {formatPrice(item.price)}
                               </div>
                             </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-medium text-gray-900">
-                              {formatPrice(item.price * item.quantity)}
+                            <div className="text-right">
+                              <div className="font-medium text-gray-900">
+                                {formatPrice(item.price * item.quantity)}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Buttons */}
-                  <div className="mt-6 flex justify-between items-center">
-                    <button className="text-primary hover:text-primary/70">Mua lại</button>
-                    <button className="text-red-600 hover:text-red-700">Hủy đơn hàng</button>
-                  </div>
-                </div>
+                    {/* Buttons */}
+                    <div className="flex justify-between items-center mt-6 pt-4 border-t">
+                      <div className="flex gap-2">
+                        {order.status === 'delivered' && (
+                          <Button variant="outline" size="sm">
+                            Mua lại
+                          </Button>
+                        )}
+                        {(order.status === 'pending' || order.status === 'confirmed') && (
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50">
+                            Hủy đơn hàng
+                          </Button>
+                        )}
+                      </div>
+                      <Button variant="outline" size="sm">
+                        <Eye className="w-4 h-4 mr-2" />
+                        Chi tiết
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 };
