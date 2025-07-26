@@ -60,6 +60,15 @@ const MyPrescriptions = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
+
+  const fetchPrescriptions = async () => {
+    const res = await fetch(`http://localhost:5000/api/prescriptions?email=${user.email}`);
+    const data = await res.json();
+    setPrescriptions(data);
+  };
+ 
+  fetchPrescriptions();
+
     const user = UserModel.fromStorage();
     
     if (!user) {

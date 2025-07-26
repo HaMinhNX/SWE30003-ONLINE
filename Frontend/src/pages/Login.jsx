@@ -62,66 +62,142 @@ const Login = () => {
     }
   ];
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  // const handleLogin = (e) => {
+  //   e.preventDefault();
     
-    const account = sampleAccounts.find(acc => acc.email === email && acc.password === password);
+  //   const account = sampleAccounts.find(acc => acc.email === email && acc.password === password);
     
-    if (account) {
-      // Store user data with user-specific cart initialization
-      const userData = {
-        name: account.name,
-        email: account.email,
-        role: account.role,
-        isLoggedIn: true
-      };
+  //   if (account) {
+  //     // Store user data with user-specific cart initialization
+  //     const userData = {
+  //       name: account.name,
+  //       email: account.email,
+  //       role: account.role,
+  //       isLoggedIn: true
+  //     };
       
-      localStorage.setItem('user', JSON.stringify(userData));
+  //     localStorage.setItem('user', JSON.stringify(userData));
       
-      // Initialize user-specific cart if it doesn't exist
-      const cartKey = `cart_${account.email}`;
-      if (!localStorage.getItem(cartKey)) {
-        localStorage.setItem(cartKey, JSON.stringify([]));
-      }
+  //     // Initialize user-specific cart if it doesn't exist
+  //     const cartKey = `cart_${account.email}`;
+  //     if (!localStorage.getItem(cartKey)) {
+  //       localStorage.setItem(cartKey, JSON.stringify([]));
+  //     }
       
-      console.log(`Đăng nhập thành công với vai trò: ${account.role}`);
-      navigate('/');
-      window.location.reload();
-    } else {
-      alert('Email hoặc mật khẩu không đúng!');
-    }
-  };
+  //     console.log(`Đăng nhập thành công với vai trò: ${account.role}`);
+  //     navigate('/');
+  //     window.location.reload();
+  //   } else {
+  //     alert('Email hoặc mật khẩu không đúng!');
+  //   }
+  // };
 
-  const handleRegister = (e) => {
-    e.preventDefault();
-    
-    if (password !== confirmPassword) {
-      alert('Mật khẩu xác nhận không khớp!');
-      return;
-    }
-    
-    if (!name || !email || !password || !selectedRole) {
-      alert('Vui lòng điền đầy đủ thông tin!');
-      return;
-    }
-    
-    const newUser = {
-      name,
-      email,
-      role: selectedRole,
+  const handleLogin = async (e) => {
+  e.preventDefault();
+
+  try {
+    const res = await fetch('http://localhost:5000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        password
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Đăng nhập thất bại!');
+
+    const userData = {
+      name: data.user.name,
+      email: data.user.email,
+      role: data.user.role,
+      token: data.token,
       isLoggedIn: true
     };
-    
-    localStorage.setItem('user', JSON.stringify(newUser));
-    
-    // Initialize user-specific cart
-    const cartKey = `cart_${email}`;
-    localStorage.setItem(cartKey, JSON.stringify([]));
-    
-    console.log('Đăng ký thành công!');
+
+    localStorage.setItem('user', JSON.stringify(userData));
+    const cartKey = `cart_${data.user.email}`;
+    if (!localStorage.getItem(cartKey)) {
+      localStorage.setItem(cartKey, JSON.stringify([]));
+    }
+
+    alert('Đăng nhập thành công!');
     navigate('/');
     window.location.reload();
-  };
+  } catch (err) {
+    alert(`Lỗi đăng nhập: ${err.message}`);
+  }
+};
+
+
+  // const handleRegister = (e) => {
+  //   e.preventDefault();
+    
+  //   if (password !== confirmPassword) {
+  //     alert('Mật khẩu xác nhận không khớp!');
+  //     return;
+  //   }
+    
+  //   if (!name || !email || !password || !selectedRole) {
+  //     alert('Vui lòng điền đầy đủ thông tin!');
+  //     return;
+  //   }
+    
+  //   const newUser = {
+  //     name,
+  //     email,
+  //     role: selectedRole,
+  //     isLoggedIn: true
+  //   };
+    
+  //   localStorage.setItem('user', JSON.stringify(newUser));
+    
+  //   // Initialize user-specific cart
+  //   const cartKey = `cart_${email}`;
+  //   localStorage.setItem(cartKey, JSON.stringify([]));
+    
+  //   console.log('Đăng ký thành công!');
+  //   navigate('/');
+  //   window.location.reload();
+  // };
+
+const handleRegister = async (e) => {
+  e.preventDefault();
+
+  if (password !== confirmPassword) {
+    alert('Mật khẩu xác nhận không khớp!');
+    return;
+  }
+
+  if (!name || !email || !password || !selectedRole) {
+    alert('Vui lòng điền đầy đủ thông tin!');
+    return;
+  }
+
+  try {
+    const res = await fetch('http://localhost:5000/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+        role: selectedRole
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Đăng ký thất bại!');
+
+    alert('Đăng ký thành công!');
+    navigate('/');
+    window.location.reload();
+  } catch (err) {
+    alert(`Lỗi đăng ký: ${err.message}`);
+  }
+};
+
 
   const quickLogin = (account) => {
     const userData = {

@@ -16,7 +16,7 @@ import Prescription from "./pages/Prescription";
 import PrescriptionManagement from "./pages/PrescriptionManagement";
 import MyPrescriptions from "./pages/MyPrescriptions";
 import Management from "./pages/Management";
-import StoreDetail from "./pages/StoreDetail";
+import StoreDetail from  "./pages/StoreDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

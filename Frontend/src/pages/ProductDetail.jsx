@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
@@ -12,29 +12,34 @@ const ProductDetail = () => {
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock data - trong thực tế sẽ fetch từ API dựa trên id
-  const product = {
-    id: parseInt(id || '1'),
-    name: 'Paracetamol 500mg',
-    category: 'Thuốc giảm đau',
-    price: 25000,
-    originalPrice: 30000,
-    rating: 4.8,
-    reviews: 156,
-    images: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'],
-    isHot: true,
-    discount: 17,
-    stock: 50,
-    brand: 'Traphaco',
-    origin: 'Việt Nam',
-    description: 'Paracetamol 500mg là thuốc giảm đau, hạ sốt được sử dụng rộng rãi và an toàn cho cả người lớn và trẻ em.',
-    ingredients: 'Paracetamol 500mg',
-    usage: 'Người lớn: 1-2 viên/lần, 3-4 lần/ngày. Trẻ em: Theo chỉ dẫn của bác sĩ.',
-    storage: 'Bảo quản nơi khô ráo, thoáng mát, tránh ánh sáng trực tiếp.',
-    warnings: 'Không dùng cho người mẫn cảm với Paracetamol. Không dùng quá liều.',
-    expiry: '24 tháng kể từ ngày sản xuất'
-  };
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`http://localhost:5000/api/products/${id}`);
+        
+        if (!response.ok) {
+          throw new Error('Product not found');
+        }
+        
+        const data = await response.json();
+        setProduct(data);
+      } catch (err) {
+        console.error('Error loading product:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchProduct();
+    }
+  }, [id]);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -51,19 +56,13 @@ const ProductDetail = () => {
   };
 
   const addToCart = () => {
-    const currentUser = localStorage.getItem('user');
-    if (!currentUser) {
-      console.log("Vui lòng đăng nhập để thêm vào giỏ hàng");
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!currentUser.isLoggedIn) {
+      alert("Vui lòng đăng nhập để thêm vào giỏ hàng");
       return;
     }
     
-    const user = JSON.parse(currentUser);
-    if (!user.isLoggedIn) {
-      console.log("Vui lòng đăng nhập để thêm vào giỏ hàng");
-      return;
-    }
-    
-    const cartKey = `cart_${user.email}`;
+    const cartKey = `cart_${currentUser.email}`;
     const cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
     const existingItem = cart.find((item) => item.id === product.id);
     
@@ -74,9 +73,9 @@ const ProductDetail = () => {
         id: product.id,
         name: product.name,
         price: product.price,
-        originalPrice: product.originalPrice,
+        originalPrice: product.original_price,
         quantity: quantity,
-        image: product.images[0],
+        image: product.images || '/placeholder.svg',
         stock: product.stock,
         category: product.category
       });
@@ -85,13 +84,51 @@ const ProductDetail = () => {
     localStorage.setItem(cartKey, JSON.stringify(cart));
     window.dispatchEvent(new Event('storage'));
     
-    console.log(`Đã thêm ${quantity} ${product.name} vào giỏ hàng`);
+    alert(`Đã thêm ${quantity} ${product.name} vào giỏ hàng`);
   };
 
   const addToWishlist = () => {
-    console.log(`Thêm ${product.name} vào danh sách yêu thích`);
-    // Logic thêm vào wishlist
+    alert(`Đã thêm ${product.name} vào danh sách yêu thích`);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-gray-500">Đang tải sản phẩm...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="text-6xl text-gray-300 mb-4">❌</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Không tìm thấy sản phẩm</h2>
+            <p className="text-gray-500 mb-4">Sản phẩm bạn tìm kiếm không tồn tại hoặc đã bị xóa.</p>
+            <Button asChild>
+              <Link to="/products">Quay lại danh sách sản phẩm</Link>
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Create mock images array if not provided
+  const productImages = product.images ? 
+    (Array.isArray(product.images) ? product.images : [product.images]) : 
+    ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -126,7 +163,7 @@ const ProductDetail = () => {
             
             {/* Thumbnail images */}
             <div className="flex gap-2">
-              {product.images.map((_, index) => (
+              {productImages.map((_, index) => (
                 <button
                   key={index}
                   className={`w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center ${
@@ -145,11 +182,16 @@ const ProductDetail = () => {
             {/* Header */}
             <div>
               <div className="flex items-center gap-2 mb-2">
-                {product.isHot && (
-                  <Badge className="bg-red-500 text-white">HOT</Badge>
+                {product.stock < 10 && product.stock > 0 && (
+                  <Badge className="bg-orange-500 text-white">Sắp hết hàng</Badge>
                 )}
-                {product.discount > 0 && (
-                  <Badge className="bg-primary text-white">-{product.discount}%</Badge>
+                {product.stock === 0 && (
+                  <Badge className="bg-red-500 text-white">Hết hàng</Badge>
+                )}
+                {product.original_price && product.original_price > product.price && (
+                  <Badge className="bg-primary text-white">
+                    Giảm {Math.round(((product.original_price - product.price) / product.original_price) * 100)}%
+                  </Badge>
                 )}
               </div>
               
@@ -159,8 +201,12 @@ const ProductDetail = () => {
               <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center">
                   <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                  <span className="text-lg font-medium text-gray-700 ml-1">{product.rating}</span>
-                  <span className="text-gray-500 ml-2">({product.reviews} đánh giá)</span>
+                  <span className="text-lg font-medium text-gray-700 ml-1">
+                    {product.rating || 0}
+                  </span>
+                  <span className="text-gray-500 ml-2">
+                    ({product.reviews || 0} đánh giá)
+                  </span>
                 </div>
               </div>
             </div>
@@ -171,49 +217,54 @@ const ProductDetail = () => {
                 <span className="text-3xl font-bold text-primary">
                   {formatPrice(product.price)}
                 </span>
-                {product.originalPrice && (
+                {product.original_price && product.original_price > product.price && (
                   <span className="text-xl text-gray-500 line-through">
-                    {formatPrice(product.originalPrice)}
+                    {formatPrice(product.original_price)}
                   </span>
                 )}
               </div>
               
-              <div className="text-green-600 font-medium mb-4">
-                Còn lại: {product.stock} sản phẩm
+              <div className={`font-medium mb-4 ${
+                product.stock > 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {product.stock > 0 ? `Còn lại: ${product.stock} sản phẩm` : 'Hết hàng'}
               </div>
 
               {/* Số lượng */}
-              <div className="flex items-center gap-4 mb-6">
-                <span className="font-medium">Số lượng:</span>
-                <div className="flex items-center border rounded-lg">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleQuantityChange(-1)}
-                    disabled={quantity <= 1}
-                  >
-                    <Minus className="w-4 h-4" />
-                  </Button>
-                  <span className="px-4 py-2 font-medium">{quantity}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleQuantityChange(1)}
-                    disabled={quantity >= product.stock}
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
+              {product.stock > 0 && (
+                <div className="flex items-center gap-4 mb-6">
+                  <span className="font-medium">Số lượng:</span>
+                  <div className="flex items-center border rounded-lg">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleQuantityChange(-1)}
+                      disabled={quantity <= 1}
+                    >
+                      <Minus className="w-4 h-4" />
+                    </Button>
+                    <span className="px-4 py-2 font-medium">{quantity}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleQuantityChange(1)}
+                      disabled={quantity >= product.stock}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Buttons */}
               <div className="flex gap-4">
                 <Button 
                   className="flex-1 bg-primary hover:bg-primary/90 text-white flex items-center justify-center gap-2"
                   onClick={addToCart}
+                  disabled={product.stock === 0}
                 >
                   <ShoppingCart className="w-5 h-5" />
-                  Thêm vào giỏ - {formatPrice(product.price * quantity)}
+                  {product.stock === 0 ? 'Hết hàng' : `Thêm vào giỏ - ${formatPrice(product.price * quantity)}`}
                 </Button>
                 <Button
                   variant="outline"
@@ -266,19 +317,19 @@ const ProductDetail = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                       <div>
                         <h4 className="font-medium text-gray-900 mb-2">Thương hiệu</h4>
-                        <p className="text-gray-700">{product.brand}</p>
+                        <p className="text-gray-700">{product.brand || 'Đang cập nhật'}</p>
                       </div>
                       <div>
                         <h4 className="font-medium text-gray-900 mb-2">Xuất xứ</h4>
-                        <p className="text-gray-700">{product.origin}</p>
+                        <p className="text-gray-700">{product.origin || 'Đang cập nhật'}</p>
                       </div>
                       <div>
                         <h4 className="font-medium text-gray-900 mb-2">Hạn sử dụng</h4>
-                        <p className="text-gray-700">{product.expiry}</p>
+                        <p className="text-gray-700">{product.expiry || 'Đang cập nhật'}</p>
                       </div>
                       <div>
                         <h4 className="font-medium text-gray-900 mb-2">Bảo quản</h4>
-                        <p className="text-gray-700">{product.storage}</p>
+                        <p className="text-gray-700">{product.storage || 'Đang cập nhật'}</p>
                       </div>
                     </div>
                   </div>
@@ -286,17 +337,19 @@ const ProductDetail = () => {
                 
                 <TabsContent value="ingredients" className="mt-6">
                   <h3 className="text-lg font-semibold mb-4">Thành phần</h3>
-                  <p className="text-gray-700">{product.ingredients}</p>
+                  <p className="text-gray-700">{product.ingredients || 'Thông tin đang được cập nhật'}</p>
                 </TabsContent>
                 
                 <TabsContent value="usage" className="mt-6">
                   <h3 className="text-lg font-semibold mb-4">Cách sử dụng</h3>
-                  <p className="text-gray-700 mb-4">{product.usage}</p>
+                  <p className="text-gray-700 mb-4">{product.usage || 'Thông tin đang được cập nhật'}</p>
                   
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h4 className="font-medium text-yellow-800 mb-2">Lưu ý quan trọng</h4>
-                    <p className="text-yellow-700">{product.warnings}</p>
-                  </div>
+                  {product.warnings && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <h4 className="font-medium text-yellow-800 mb-2">Lưu ý quan trọng</h4>
+                      <p className="text-yellow-700">{product.warnings}</p>
+                    </div>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="reviews" className="mt-6">

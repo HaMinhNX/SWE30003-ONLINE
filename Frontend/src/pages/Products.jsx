@@ -36,88 +36,99 @@ const Products = () => {
     }
   }, []);
 
-  const allProducts = [
-    {
-      id: 1,
-      name: 'Paracetamol 500mg',
-      price: 25000,
-      originalPrice: 30000,
-      category: 'Thuốc giảm đau',
-      description: 'Thuốc giảm đau, hạ sốt hiệu quả',
-      rating: 4.5,
-      reviews: 125,
-      stock: 50,
-      image: '/placeholder.svg'
-    },
-    {
-      id: 2,
-      name: 'Vitamin C 1000mg',
-      price: 150000,
-      originalPrice: 180000,
-      category: 'Thực phẩm chức năng',
-      description: 'Bổ sung vitamin C tăng cường sức đề kháng',
-      rating: 4.7,
-      reviews: 89,
-      stock: 25,
-      image: '/placeholder.svg'
-    },
-    {
-      id: 3,
-      name: 'Gel rửa tay khô',
-      price: 35000,
-      originalPrice: 40000,
-      category: 'Sản phẩm y tế',
-      description: 'Gel rửa tay khô diệt khuẩn 99.9%',
-      rating: 4.3,
-      reviews: 156,
-      stock: 100,
-      image: '/placeholder.svg'
-    },
-    {
-      id: 4,
-      name: 'Thuốc ho Bro-P',
-      price: 45000,
-      category: 'Thuốc ho',
-      description: 'Thuốc ho hiệu quả cho cả gia đình',
-      rating: 4.2,
-      reviews: 67,
-      stock: 30,
-      image: '/placeholder.svg'
-    },
-    {
-      id: 5,
-      name: 'Kem chống nắng SPF50',
-      price: 85000,
-      originalPrice: 100000,
-      category: 'Chăm sóc da',
-      description: 'Kem chống nắng hiệu quả cao',
-      rating: 4.6,
-      reviews: 234,
-      stock: 40,
-      image: '/placeholder.svg'
-    },
-    {
-      id: 6,
-      name: 'Thuốc đau bụng Smecta',
-      price: 55000,
-      category: 'Thuốc tiêu hóa',
-      description: 'Thuốc trị tiêu chảy, đau bụng',
-      rating: 4.4,
-      reviews: 78,
-      stock: 60,
-      image: '/placeholder.svg'
-    }
-  ];
+  // const allProducts = [
+  //   {
+  //     id: 1,
+  //     name: 'Paracetamol 500mg',
+  //     price: 25000,
+  //     originalPrice: 30000,
+  //     category: 'Thuốc giảm đau',
+  //     description: 'Thuốc giảm đau, hạ sốt hiệu quả',
+  //     rating: 4.5,
+  //     reviews: 125,
+  //     stock: 50,
+  //     image: '/placeholder.svg'
+  //   },
+  //   {
+  //     id: 2,
+  //     name: 'Vitamin C 1000mg',
+  //     price: 150000,
+  //     originalPrice: 180000,
+  //     category: 'Thực phẩm chức năng',
+  //     description: 'Bổ sung vitamin C tăng cường sức đề kháng',
+  //     rating: 4.7,
+  //     reviews: 89,
+  //     stock: 25,
+  //     image: '/placeholder.svg'
+  //   },
+  //   {
+  //     id: 3,
+  //     name: 'Gel rửa tay khô',
+  //     price: 35000,
+  //     originalPrice: 40000,
+  //     category: 'Sản phẩm y tế',
+  //     description: 'Gel rửa tay khô diệt khuẩn 99.9%',
+  //     rating: 4.3,
+  //     reviews: 156,
+  //     stock: 100,
+  //     image: '/placeholder.svg'
+  //   },
+  //   {
+  //     id: 4,
+  //     name: 'Thuốc ho Bro-P',
+  //     price: 45000,
+  //     category: 'Thuốc ho',
+  //     description: 'Thuốc ho hiệu quả cho cả gia đình',
+  //     rating: 4.2,
+  //     reviews: 67,
+  //     stock: 30,
+  //     image: '/placeholder.svg'
+  //   },
+  //   {
+  //     id: 5,
+  //     name: 'Kem chống nắng SPF50',
+  //     price: 85000,
+  //     originalPrice: 100000,
+  //     category: 'Chăm sóc da',
+  //     description: 'Kem chống nắng hiệu quả cao',
+  //     rating: 4.6,
+  //     reviews: 234,
+  //     stock: 40,
+  //     image: '/placeholder.svg'
+  //   },
+  //   {
+  //     id: 6,
+  //     name: 'Thuốc đau bụng Smecta',
+  //     price: 55000,
+  //     category: 'Thuốc tiêu hóa',
+  //     description: 'Thuốc trị tiêu chảy, đau bụng',
+  //     rating: 4.4,
+  //     reviews: 78,
+  //     stock: 60,
+  //     image: '/placeholder.svg'
+  //   }
+  // ];
 
-  const categories = [
-    'all',
-    'Thuốc giảm đau',
-    'Thực phẩm chức năng',
-    'Sản phẩm y tế',
-    'Thuốc ho',
-    'Chăm sóc da',
-    'Thuốc tiêu hóa'
-  ];
+  // const categories = [
+  //   'all',
+  //   'Thuốc giảm đau',
+  //   'Thực phẩm chức năng',
+  //   'Sản phẩm y tế',
+  //   'Thuốc ho',
+  //   'Chăm sóc da',
+  //   'Thuốc tiêu hóa'
+  // ];
+
+  const [allProducts, setAllProducts] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/products')
+      .then(res => res.json())
+      .then(data => setAllProducts(data))
+      .catch(err => console.error('Failed to load products:', err));
+  }, []);
+
+  const categories = ['all', ...new Set(allProducts.map(p => p.category))];
 
   const filteredProducts = allProducts.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
