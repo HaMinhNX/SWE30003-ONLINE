@@ -50,3 +50,6 @@ router.delete('/:id', (req, res) => {
     res.json({ success: true });
   });
 });
+
+// at the very end of routes/stores.js
+module.exports = router;
