@@ -1,4 +1,5 @@
-const mysql = require('mysql2');
+//db.js
+const mysql = require('mysql');
 require('dotenv').config();
 
 const db = mysql.createConnection({
@@ -14,3 +15,4 @@ db.connect((err) => {
 });
 
 module.exports = db;
+

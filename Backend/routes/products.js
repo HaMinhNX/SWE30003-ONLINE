@@ -23,4 +23,75 @@ router.get('/:id', (req, res) => {
   });
 });
 
+router.post('/', (req, res) => {
+  const product = req.body;
+  const query = `
+    INSERT INTO products 
+    (name, activeIngredient, price, stock, category, form, strength, packaging, uses, shortDescription, detailedDescription, img)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+  const values = [
+    product.name,
+    product.activeIngredient,
+    product.price,
+    product.stock,
+    product.category,
+    product.form,
+    product.strength,
+    product.packaging,
+    product.uses,
+    product.shortDescription,
+    product.detailedDescription,
+    product.img
+  ];
+
+  db.query(query, values, (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ id: result.insertId, ...product });
+  });
+});
+
+
+router.delete('/:id', (req, res) => {
+  const { id } = req.params;
+  db.query('DELETE FROM products WHERE id = ?', [id], (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+
+router.put('/:id', (req, res) => {
+  const { id } = req.params;
+  const product = req.body;
+
+  const query = `
+    UPDATE products SET 
+    name=?, activeIngredient=?, price=?, stock=?, category=?, form=?, strength=?, packaging=?, uses=?, shortDescription=?, detailedDescription=?, img=?
+    WHERE id = ?`;
+
+  const values = [
+    product.name,
+    product.activeIngredient,
+    product.price,
+    product.stock,
+    product.category,
+    product.form,
+    product.strength,
+    product.packaging,
+    product.uses,
+    product.shortDescription,
+    product.detailedDescription,
+    product.img,
+    id
+  ];
+
+  db.query(query, values, (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
 module.exports = router;
+
+

@@ -288,7 +288,7 @@ const Products = () => {
                     <SelectTrigger>
                       <SelectValue placeholder="Chọn danh mục" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       <SelectItem value="all">Tất cả</SelectItem>
                       {categories.slice(1).map((category) => (
                         <SelectItem key={category} value={category}>
@@ -321,7 +321,7 @@ const Products = () => {
                     <SelectTrigger>
                       <SelectValue placeholder="Sắp xếp theo" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       <SelectItem value="name">Tên A-Z</SelectItem>
                       <SelectItem value="price-low">Giá thấp đến cao</SelectItem>
                       <SelectItem value="price-high">Giá cao đến thấp</SelectItem>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
@@ -19,27 +19,112 @@ const Prescription = () => {
   const [dosage, setDosage] = useState('');
   const [quantity, setQuantity] = useState('');
   const [instructions, setInstructions] = useState('');
+  const [previousPrescriptions, setPreviousPrescriptions] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [patients, setPatients] = useState([]);
+  const [medicines, setMedicines] = useState([]);
 
-  // Mock data cho bệnh nhân
-  const patients = [
-    { id: 1, name: 'Nguyễn Văn A', email: 'customer@longchau.com', phone: '0123456789', age: 35 },
-    { id: 2, name: 'Trần Thị B', email: 'customer2@longchau.com', phone: '0987654321', age: 28 },
-    { id: 3, name: 'Lê Văn C', email: 'customer3@longchau.com', phone: '0369258147', age: 45 }
-  ];
 
-  // Mock data cho thuốc
-  const medicines = [
-    { id: 1, name: 'Paracetamol 500mg', type: 'Thuốc giảm đau' },
-    { id: 2, name: 'Amoxicillin 250mg', type: 'Kháng sinh' },
-    { id: 3, name: 'Vitamin C 1000mg', type: 'Thực phẩm chức năng' },
-    { id: 4, name: 'Omeprazole 20mg', type: 'Thuốc dạ dày' },
-    { id: 5, name: 'Cetirizine 10mg', type: 'Thuốc dị ứng' }
-  ];
+
+  // // Mock data cho bệnh nhân
+  // const patients = [
+  //   { id: 1, name: 'Nguyễn Văn A', email: 'customer@longchau.com', phone: '0123456789', age: 35 },
+  //   { id: 2, name: 'Trần Thị B', email: 'customer2@longchau.com', phone: '0987654321', age: 28 },
+  //   { id: 3, name: 'Lê Văn C', email: 'customer3@longchau.com', phone: '0369258147', age: 45 }
+  // ];
+
+  // // Mock data cho thuốc
+  // const medicines = [
+  //   { id: 1, name: 'Paracetamol 500mg', type: 'Thuốc giảm đau' },
+  //   { id: 2, name: 'Amoxicillin 250mg', type: 'Kháng sinh' },
+  //   { id: 3, name: 'Vitamin C 1000mg', type: 'Thực phẩm chức năng' },
+  //   { id: 4, name: 'Omeprazole 20mg', type: 'Thuốc dạ dày' },
+  //   { id: 5, name: 'Cetirizine 10mg', type: 'Thuốc dị ứng' }
+  // ];
+
+  useEffect(() => {
+    const fetchPrescriptions = async () => {
+      const selected = patients.find(p => p.id.toString() === selectedPatient);
+      if (!selected) return;
+
+      setLoadingHistory(true);
+      try {
+        const res = await fetch(`http://localhost:5000/api/prescriptions?email=${selected.email}`);
+        const data = await res.json();
+        setPreviousPrescriptions(data);
+      } catch (err) {
+        console.error("Lỗi khi tải đơn thuốc trước đó:", err);
+      } finally {
+        setLoadingHistory(false);
+      }
+    };
+
+    if (selectedPatient) {
+      fetchPrescriptions();
+    }
+  }, [selectedPatient, patients]);  // Add `patients` to dependency so it's ready
+
+  useEffect(() => {
+    const removeDiacritics = (str) => {
+      return str
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D');
+    };
+
+    const term = removeDiacritics(searchPatient.trim().toLowerCase());
+    const filteredPatients = patients.filter(patient =>
+      patient._normalizedName.includes(term) ||
+      patient._normalizedEmail.includes(term)
+    );
+
+    const fetchPatients = async () => {
+      const res = await fetch('http://localhost:5000/api/auth/users');
+      const data = await res.json();
+
+      const filtered = data.filter(user => user.role === 'Customer')
+      .map((user) => ({
+        ...user,
+        _normalizedName: removeDiacritics(user.name.toLowerCase()),
+        _normalizedEmail: removeDiacritics(user.email.toLowerCase())
+      }));
+
+      console.log('Filtered patients:', filtered);
+      setPatients(filtered);
+    };
+
+    
+    const fetchMedicines = async () => {
+      const res = await fetch('http://localhost:5000/api/products');
+      const data = await res.json();
+      setMedicines(data);
+    };
+
+
+
+    fetchPatients();
+    fetchMedicines();
+  }, []);
+
+
+  // const filteredPatients = patients.filter(patient =>
+  //   (patient.name && patient.name.toLowerCase().includes(searchPatient.toLowerCase())) ||
+  //   (patient.email && patient.email.toLowerCase().includes(searchPatient.toLowerCase()))
+  // );
+
+  const normalizedSearch = searchPatient.normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase();
 
   const filteredPatients = patients.filter(patient =>
-    patient.name.toLowerCase().includes(searchPatient.toLowerCase()) ||
-    patient.email.toLowerCase().includes(searchPatient.toLowerCase())
+    patient._normalizedName.includes(normalizedSearch) ||
+    patient._normalizedEmail.includes(normalizedSearch)
   );
+
+
 
   const addMedicine = () => {
     if (selectedMedicine && dosage && quantity && instructions) {
@@ -63,36 +148,94 @@ const Prescription = () => {
     setPrescriptionItems(prescriptionItems.filter(item => item.id !== id));
   };
 
-  const sendPrescription = () => {
+  // const sendPrescription = async () => {
+  //   if (!selectedPatient || prescriptionItems.length === 0) {
+  //     alert('Vui lòng chọn bệnh nhân và thêm thuốc!');
+  //     return;
+  //   }
+
+  //   // Check if there's already a prescription for this patient today
+  //   const hasToday = previousPrescriptions.some(p => {
+  //     const today = new Date().toDateString();
+  //     return new Date(p.createdAt).toDateString() === today;
+  //   });
+
+  //   if (hasToday) {
+  //     alert('Bệnh nhân này đã được kê đơn hôm nay.');
+  //     return;
+  //   }
+
+  //   const response = await fetch('http://localhost:5000/api/prescriptions', {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: JSON.stringify({
+  //       patientEmail: patients.find(p => p.id.toString() === selectedPatient).email,
+  //       doctorName: JSON.parse(localStorage.getItem('user') || '{}').name,
+  //       items: prescriptionItems
+  //     })
+  //   });
+
+  //   const data = await response.json();
+
+  //   if (data.success) {
+  //     alert('Đơn thuốc đã gửi!');
+  //     setPrescriptionItems([]);
+  //     setSelectedPatient('');
+  //   } else {
+  //     alert('Gửi thất bại!');
+  //   }
+  // };
+
+  const sendPrescription = async () => {
     if (!selectedPatient || prescriptionItems.length === 0) {
-      alert('Vui lòng chọn bệnh nhân và thêm ít nhất một loại thuốc!');
+      alert('Vui lòng chọn bệnh nhân và thêm thuốc!');
       return;
     }
 
-    // Lưu đơn thuốc vào localStorage
-    const existingPrescriptions = JSON.parse(localStorage.getItem('prescriptions') || '[]');
-    const newPrescription = {
-      id: Date.now(),
-      patientId: selectedPatient,
-      patient: patients.find(p => p.id.toString() === selectedPatient),
-      doctorName: JSON.parse(localStorage.getItem('user') || '{}').name,
-      items: prescriptionItems,
-      status: 'pending',
-      createdAt: new Date().toISOString()
-    };
-    
-    existingPrescriptions.push(newPrescription);
-    localStorage.setItem('prescriptions', JSON.stringify(existingPrescriptions));
+    // (existing “hasToday” check…)
 
-    alert('Đã gửi đơn thuốc thành công!');
-    setSelectedPatient('');
-    setPrescriptionItems([]);
+    try {
+      const response = await fetch('http://localhost:5000/api/prescriptions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientEmail: patients.find(p => p.id.toString() === selectedPatient).email,
+          doctorName: JSON.parse(localStorage.getItem('user') || '{}').name,
+          items: prescriptionItems
+        })
+      });
+
+      // 1️⃣ Check HTTP status:
+      if (!response.ok) {
+        console.error('Server returned HTTP', response.status);
+        alert(`Lỗi máy chủ: ${response.status}`);
+        return;
+      }
+
+      const data = await response.json();
+      console.log('POST /api/prescriptions →', data);
+
+      // 2️⃣ Ensure backend actually sends { success: true }
+      if (data.success) {
+        alert('✅ Đơn thuốc đã gửi thành công!');
+        setPrescriptionItems([]);
+        setSelectedPatient('');
+        // TODO: refetch previousPrescriptions here if you want it to appear
+      } else {
+        // backend sent something like { error: '...' }?
+        alert('❌ Gửi thất bại: ' + (data.error || 'Không rõ lỗi'));
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+      alert('❌ Không thể kết nối tới máy chủ. Vui lòng thử lại.');
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
@@ -128,26 +271,67 @@ const Prescription = () => {
                     className="pl-10"
                   />
                 </div>
-                
+
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {filteredPatients.map((patient) => (
+                  {/* {filteredPatients.map((patient) => (
                     <div
                       key={patient.id}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                        selectedPatient === patient.id.toString()
-                          ? 'border-primary bg-primary/5'
-                          : 'hover:bg-gray-50'
-                      }`}
+                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${selectedPatient === patient.id.toString()
+                        ? 'border-primary bg-primary/5'
+                        : 'hover:bg-gray-50'
+                        }`}
                       onClick={() => setSelectedPatient(patient.id.toString())}
                     >
                       <div className="font-medium">{patient.name}</div>
                       <div className="text-sm text-gray-500">{patient.email}</div>
-                      <div className="text-sm text-gray-500">Tuổi: {patient.age}</div>
+
                     </div>
-                  ))}
+                  ))} */}
+
+                  {filteredPatients.map((patient) => {
+                    const isSelected = selectedPatient === patient.id.toString();
+                    return (
+                      <div
+                        key={patient.id}
+                        className={`p-3 border rounded-lg cursor-pointer transition-colors 
+        ${isSelected
+                            ? 'bg-green-100 border-green-500 ring-1 ring-green-300'
+                            : 'hover:bg-gray-100'
+                          }`}
+                        onClick={() => setSelectedPatient(patient.id.toString())}
+                      >
+                        <div className="font-medium text-gray-900">{patient.name}</div>
+                        <div className="text-sm text-gray-600 italic">{patient.email}</div>
+                      </div>
+                    );
+                  })}
+
                 </div>
               </CardContent>
             </Card>
+            {previousPrescriptions.length > 0 && (
+              <div className="mt-6 bg-white border p-4 rounded-lg shadow-sm">
+                <h2 className="text-lg font-semibold mb-2">Đơn thuốc trước đó:</h2>
+                {loadingHistory ? (
+                  <p className="text-gray-500">Đang tải...</p>
+                ) : (
+                  previousPrescriptions.map((presc) => (
+                    <div key={presc.id} className="border-b py-2">
+                      <p><strong>Ngày:</strong> {new Date(presc.createdAt).toLocaleString()}</p>
+                      <p><strong>Trạng thái:</strong> <span className="capitalize">{presc.status}</span></p>
+                      <ul className="list-disc ml-5 mt-1">
+                        {presc.items.map((item, idx) => (
+                          <li key={idx}>
+                            {item.medicine.name} ({item.dosage}) x{item.quantity}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
           </div>
 
           {/* Kê đơn thuốc */}
@@ -241,8 +425,8 @@ const Prescription = () => {
                           <div className="font-medium">{item.medicine.name}</div>
                           <div className="text-sm text-gray-500">{item.medicine.type}</div>
                           <div className="text-sm text-gray-600 mt-1">
-                            <span className="font-medium">Liều dùng:</span> {item.dosage} | 
-                            <span className="font-medium"> Số lượng:</span> {item.quantity} | 
+                            <span className="font-medium">Liều dùng:</span> {item.dosage} |
+                            <span className="font-medium"> Số lượng:</span> {item.quantity} |
                             <span className="font-medium"> Cách dùng:</span> {item.instructions}
                           </div>
                         </div>
@@ -282,3 +466,5 @@ const Prescription = () => {
 };
 
 export default Prescription;
+
+

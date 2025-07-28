@@ -110,9 +110,17 @@ const PrescriptionManagement = () => {
     setCurrentUser(user);
 
     try {
-      const loadedPrescriptions = PrescriptionManager.loadPrescriptions();
-      console.log('Loaded prescriptions:', loadedPrescriptions);
-      setPrescriptions(loadedPrescriptions);
+      // const loadedPrescriptions = PrescriptionManager.loadPrescriptions();
+      const loadPrescriptions = async () => {
+        const res = await fetch('http://localhost:5000/api/prescriptions');
+        const data = await res.json();
+        setPrescriptions(data);
+      };
+
+      loadPrescriptions();
+
+      // console.log('Loaded prescriptions:', loadedPrescriptions);
+      // setPrescriptions(loadedPrescriptions);
     } catch (err) {
       setError('Có lỗi khi tải dữ liệu đơn thuốc');
       console.error('Error loading prescriptions:', err);
@@ -121,16 +129,33 @@ const PrescriptionManagement = () => {
     setLoading(false);
   }, []);
 
+  // const updatePrescriptionStatus = async (id, status) => {
+  //   try {
+  //     const updated = PrescriptionManager.updatePrescriptionStatus(prescriptions, id, status);
+  //     setPrescriptions(updated);
+  //     setError('');
+  //   } catch (err) {
+  //     setError('Có lỗi khi cập nhật trạng thái đơn thuốc');
+  //     console.error('Error updating prescription:', err);
+  //   }
+  // };
+
   const updatePrescriptionStatus = async (id, status) => {
     try {
-      const updated = PrescriptionManager.updatePrescriptionStatus(prescriptions, id, status);
-      setPrescriptions(updated);
-      setError('');
+      await fetch(`http://localhost:5000/api/prescriptions/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+
+      setPrescriptions((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, status } : p))
+      );
     } catch (err) {
-      setError('Có lỗi khi cập nhật trạng thái đơn thuốc');
-      console.error('Error updating prescription:', err);
+      setError('Không thể cập nhật trạng thái đơn thuốc');
     }
   };
+
 
   const getStatusBadge = (status) => {
     switch (status) {
