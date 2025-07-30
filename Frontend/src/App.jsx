@@ -16,8 +16,9 @@ import Prescription from "./pages/Prescription";
 import PrescriptionManagement from "./pages/PrescriptionManagement";
 import MyPrescriptions from "./pages/MyPrescriptions";
 import Management from "./pages/Management";
-import StoreDetail from  "./pages/StoreDetail";
+import StoreDetail from "./pages/StoreDetail";
 import NotFound from "./pages/NotFound";
+// import { ErrorBoundary } from './components/ErrorBoundary';
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,14 @@ const App = () => (
           <Route path="/store-detail/:id" element={<StoreDetail />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
+          {/* <Route
+            path="/prescriptions"
+            element={
+              <ErrorBoundary>
+                <PrescriptionManagement />
+              </ErrorBoundary>
+            }
+          /> */}
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
