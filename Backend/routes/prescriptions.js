@@ -219,7 +219,7 @@ router.put('/:id/status', (req, res) => {
                 console.error('Error checking prescription:', err);
                 return res.status(500).json({ error: 'Database error' });
             }
-
+            
             if (results.length === 0) {
                 return res.status(404).json({ error: 'Prescription not found' });
             }

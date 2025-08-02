@@ -2,7 +2,7 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-DROP DATABASE pharmacy_system;
+DROP DATABASE IF EXISTS pharmacy_system ;
 CREATE DATABASE IF NOT EXISTS `pharmacy_system` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `pharmacy_system`;
 
