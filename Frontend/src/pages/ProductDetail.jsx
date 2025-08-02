@@ -302,11 +302,11 @@ const ProductDetail = () => {
           <Card>
             <CardContent className="p-6">
               <Tabs defaultValue="description" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="description">Mô tả</TabsTrigger>
                   <TabsTrigger value="ingredients">Thành phần</TabsTrigger>
                   <TabsTrigger value="usage">Cách dùng</TabsTrigger>
-                  <TabsTrigger value="reviews">Đánh giá</TabsTrigger>
+                  {/* <TabsTrigger value="reviews">Đánh giá</TabsTrigger> */}
                 </TabsList>
                 
                 <TabsContent value="description" className="mt-6">
@@ -323,14 +323,10 @@ const ProductDetail = () => {
                         <h4 className="font-medium text-gray-900 mb-2">Xuất xứ</h4>
                         <p className="text-gray-700">{product.origin || 'Đang cập nhật'}</p>
                       </div>
-                      <div>
+                      {/* <div>
                         <h4 className="font-medium text-gray-900 mb-2">Hạn sử dụng</h4>
                         <p className="text-gray-700">{product.expiry || 'Đang cập nhật'}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-2">Bảo quản</h4>
-                        <p className="text-gray-700">{product.storage || 'Đang cập nhật'}</p>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </TabsContent>
@@ -344,15 +340,20 @@ const ProductDetail = () => {
                   <h3 className="text-lg font-semibold mb-4">Cách sử dụng</h3>
                   <p className="text-gray-700 mb-4">{product.usage || 'Thông tin đang được cập nhật'}</p>
                   
-                  {product.warnings && (
+                  {/* {product.warnings && (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                       <h4 className="font-medium text-yellow-800 mb-2">Lưu ý quan trọng</h4>
                       <p className="text-yellow-700">{product.warnings}</p>
                     </div>
-                  )}
+                  )} */}
+
+                  <div>
+                    <h4 className="font-medium text-gray-900 mb-2">Bảo quản</h4>
+                    <p className="text-gray-700">{product.storage || 'Đang cập nhật'}</p>
+                  </div>
                 </TabsContent>
                 
-                <TabsContent value="reviews" className="mt-6">
+                {/* <TabsContent value="reviews" className="mt-6">
                   <h3 className="text-lg font-semibold mb-4">Đánh giá từ khách hàng</h3>
                   <div className="space-y-4">
                     {[...Array(3)].map((_, index) => (
@@ -377,7 +378,7 @@ const ProductDetail = () => {
                       </div>
                     ))}
                   </div>
-                </TabsContent>
+                </TabsContent> */}
               </Tabs>
             </CardContent>
           </Card>

@@ -8,6 +8,8 @@ const productRoutes = require('./routes/products.js');
 const prescriptionRoutes = require('./routes/prescriptions.js');
 const storeRoutes = require('./routes/stores.js');
 const employeeRoutes = require('./routes/employees.js');
+const orderRoutes = require('./routes/orders.js');
+const orderHistory = require('./routes/orderHistory.js')
 
 
 const app = express();
@@ -21,6 +23,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/stores', storeRoutes);
 app.use('/api/employees', employeeRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/orderHistory', orderHistory)
 // Start server
 app.listen(process.env.PORT, () => {
   console.log(`Server running on http://localhost:${process.env.PORT}`);

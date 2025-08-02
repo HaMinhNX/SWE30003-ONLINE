@@ -23,20 +23,24 @@ const Checkout = () => {
     district: '',
     note: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    const currentUser = localStorage.getItem('user');
-    if (!currentUser) {
+    const currentUserData = localStorage.getItem('user');
+    if (!currentUserData) {
       navigate('/login');
       return;
     }
-    
-    const user = JSON.parse(currentUser);
+
+    const user = JSON.parse(currentUserData);
     if (!user.isLoggedIn) {
       navigate('/login');
       return;
     }
-    
+
+    setCurrentUser(user);
+
     const cartKey = `cart_${user.email}`;
     const cart = localStorage.getItem(cartKey);
     if (cart) {
@@ -76,48 +80,95 @@ const Checkout = () => {
     }));
   };
 
-  const handleSubmitOrder = (e) => {
+  const handleSubmitOrder = async (e) => {
     e.preventDefault();
-    
+
     if (!customerInfo.name || !customerInfo.phone || !customerInfo.address) {
       alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
       return;
     }
 
-    const order = {
-      id: Date.now(),
-      items: cartItems,
-      customerInfo,
-      paymentMethod,
-      totalAmount: getTotalPrice(),
-      status: 'pending',
-      createdAt: new Date().toISOString()
-    };
+    if (!currentUser) {
+      alert('Vui lòng đăng nhập để đặt hàng!');
+      return;
+    }
 
-    const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-    existingOrders.push(order);
-    localStorage.setItem('orders', JSON.stringify(existingOrders));
+    setLoading(true);
 
-    if (paymentMethod === 'stripe') {
-      alert('Thanh toán đã được xử lý thành công!');
-      setTimeout(() => {
-        const currentUser = localStorage.getItem('user');
-        if (currentUser) {
-          const userData = JSON.parse(currentUser);
-          const cartKey = `cart_${userData.email}`;
-          localStorage.removeItem(cartKey);
-        }
-        navigate('/payment-success', { state: { orderId: order.id } });
-      }, 1000);
-    } else {
-      alert('Đơn hàng đã được xác nhận! Bạn sẽ thanh toán khi nhận hàng.');
-      const currentUser = localStorage.getItem('user');
-      if (currentUser) {
-        const userData = JSON.parse(currentUser);
-        const cartKey = `cart_${userData.email}`;
-        localStorage.removeItem(cartKey);
+    try {
+      // Prepare order data
+      const orderData = {
+        user_email: currentUser.email,
+        items: cartItems.map(item => ({
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          category: item.category || ''
+        })),
+        customerInfo,
+        paymentMethod,
+        totalAmount: getTotalPrice()
+      };
+
+      console.log('Submitting order:', orderData);
+
+      // Submit order to API
+      const response = await fetch('http://localhost:5000/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to create order');
       }
-      navigate('/payment-success', { state: { orderId: order.id } });
+
+      if (result.success) {
+        // Clear cart from localStorage
+        const cartKey = `cart_${currentUser.email}`;
+        localStorage.removeItem(cartKey);
+
+        // after `if (result.success) {`
+        const saved = JSON.parse(localStorage.getItem('orders') || '[]');
+        saved.push({
+          ...result.order,
+          createdAt: result.order.created_at  // match PaymentSuccess’s `new Date(order.createdAt)`
+        });
+        localStorage.setItem('orders', JSON.stringify(saved));
+
+
+        // Trigger storage event to update navbar
+        window.dispatchEvent(new Event('storage'));
+
+        // Show success message
+        if (paymentMethod === 'stripe') {
+          alert('Thanh toán đã được xử lý thành công!');
+        } else {
+          alert('Đơn hàng đã được xác nhận! Bạn sẽ thanh toán khi nhận hàng.');
+        }
+
+        // Navigate to success page
+        navigate('/payment-success', {
+          state: {
+            orderId: result.orderId,
+            orderData: result.order
+          }
+        });
+      } else {
+        throw new Error(result.message || 'Failed to create order');
+      }
+
+
+    } catch (error) {
+      console.error('Error submitting order:', error);
+      alert('Có lỗi xảy ra khi đặt hàng: ' + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -144,7 +195,7 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center gap-4 mb-8">
           <Button variant="ghost" asChild>
@@ -179,6 +230,7 @@ const Checkout = () => {
                         onChange={(e) => handleInputChange('name', e.target.value)}
                         placeholder="Nhập họ và tên"
                         required
+                        disabled={loading}
                       />
                     </div>
                     <div>
@@ -189,6 +241,7 @@ const Checkout = () => {
                         onChange={(e) => handleInputChange('phone', e.target.value)}
                         placeholder="Nhập số điện thoại"
                         required
+                        disabled={loading}
                       />
                     </div>
                   </div>
@@ -200,6 +253,7 @@ const Checkout = () => {
                       value={customerInfo.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       placeholder="Nhập email (tùy chọn)"
+                      disabled={loading}
                     />
                   </div>
                 </CardContent>
@@ -221,6 +275,7 @@ const Checkout = () => {
                       onChange={(e) => handleInputChange('address', e.target.value)}
                       placeholder="Số nhà, tên đường"
                       required
+                      disabled={loading}
                     />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -231,6 +286,7 @@ const Checkout = () => {
                         value={customerInfo.district}
                         onChange={(e) => handleInputChange('district', e.target.value)}
                         placeholder="Quận/Huyện"
+                        disabled={loading}
                       />
                     </div>
                     <div>
@@ -240,6 +296,7 @@ const Checkout = () => {
                         value={customerInfo.city}
                         onChange={(e) => handleInputChange('city', e.target.value)}
                         placeholder="Tỉnh/Thành phố"
+                        disabled={loading}
                       />
                     </div>
                   </div>
@@ -250,6 +307,7 @@ const Checkout = () => {
                       value={customerInfo.note}
                       onChange={(e) => handleInputChange('note', e.target.value)}
                       placeholder="Ghi chú cho người giao hàng (tùy chọn)"
+                      disabled={loading}
                     />
                   </div>
                 </CardContent>
@@ -263,7 +321,7 @@ const Checkout = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} disabled={loading}>
                     <div className="flex items-center space-x-2 p-4 border rounded-lg">
                       <RadioGroupItem value="cod" id="cod" />
                       <Label htmlFor="cod" className="flex-1 cursor-pointer">
@@ -276,7 +334,7 @@ const Checkout = () => {
                         </div>
                       </Label>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2 p-4 border rounded-lg">
                       <RadioGroupItem value="stripe" id="stripe" />
                       <Label htmlFor="stripe" className="flex-1 cursor-pointer">
@@ -338,8 +396,19 @@ const Checkout = () => {
                       <span className="text-primary">{formatPrice(getTotalPrice())}</span>
                     </div>
 
-                    <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white">
-                      {paymentMethod === 'stripe' ? 'Thanh toán ngay' : 'Đặt hàng'}
+                    <Button
+                      type="submit"
+                      className="w-full bg-primary hover:bg-primary/90 text-white"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                          Đang xử lý...
+                        </div>
+                      ) : (
+                        paymentMethod === 'stripe' ? 'Thanh toán ngay' : 'Đặt hàng'
+                      )}
                     </Button>
 
                     <div className="text-xs text-gray-500 text-center">

@@ -366,7 +366,41 @@ const MyPrescriptions = () => {
         initializeComponent();
     }, []);
 
-    const handleOrderPrescription = (prescription) => {
+    // const handleOrderPrescription = (prescription) => {
+    //     try {
+    //         if (!currentUser) {
+    //             alert('Vui lòng đăng nhập để đặt mua thuốc');
+    //             return;
+    //         }
+
+    //         const cartItems = CustomerPrescriptionManager.convertToCartItems(prescription.items);
+
+    //         if (cartItems.length === 0) {
+    //             alert('Đơn thuốc này không có sản phẩm hợp lệ để đặt mua');
+    //             return;
+    //         }
+
+    //         console.log('Adding items to cart:', cartItems);
+
+    //         // Add items to cart
+    //         cartItems.forEach(item => {
+    //             Cart.addItem(currentUser.email, item);
+    //         });
+
+    //         const totalValue = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    //         alert(`Đã thêm ${cartItems.length} sản phẩm vào giỏ hàng!\nTổng giá trị: ${formatPrice(totalValue)}`);
+
+    //         // Navigate to cart
+    //         navigate('/cart');
+    //     } catch (error) {
+    //         console.error('Error adding prescription to cart:', error);
+    //         alert('Có lỗi khi thêm đơn thuốc vào giỏ hàng: ' + error.message);
+    //     }
+    // };
+
+    // Replace the handleOrderPrescription function in MyPrescriptions.jsx with this updated version:
+
+    const handleOrderPrescription = async (prescription) => {
         try {
             if (!currentUser) {
                 alert('Vui lòng đăng nhập để đặt mua thuốc');
@@ -380,21 +414,114 @@ const MyPrescriptions = () => {
                 return;
             }
 
-            console.log('Adding items to cart:', cartItems);
+            console.log('Adding prescription items to cart:', cartItems);
 
-            // Add items to cart
-            cartItems.forEach(item => {
-                Cart.addItem(currentUser.email, item);
+            // Option 1: Add to cart for user to review and checkout normally
+            const addToCartChoice = confirm(
+                `Bạn muốn:\n` +
+                `• THÊM VÀO GIỎ HÀNG để xem lại trước khi đặt?\n` +
+                `• Nhấn OK để thêm vào giỏ hàng\n` +
+                `• Nhấn Cancel để đặt hàng ngay lập tức`
+            );
+
+            if (addToCartChoice) {
+                // Add items to cart for review
+                cartItems.forEach(item => {
+                    Cart.addItem(currentUser.email, item);
+                });
+
+                const totalValue = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                alert(`Đã thêm ${cartItems.length} sản phẩm vào giỏ hàng!\nTổng giá trị: ${formatPrice(totalValue)}`);
+
+                // Navigate to cart
+                navigate('/cart');
+            } else {
+                // Direct order - bypass cart and go straight to order creation
+                const confirmed = confirm(
+                    `Đặt hàng trực tiếp với thông tin:\n` +
+                    `• ${cartItems.length} sản phẩm\n` +
+                    `• Tổng tiền: ${formatPrice(cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0))}\n` +
+                    `• Giao hàng đến địa chỉ đã đăng ký\n` +
+                    `• Thanh toán khi nhận hàng\n\n` +
+                    `Xác nhận đặt hàng?`
+                );
+
+                if (confirmed) {
+                    await createDirectOrder(prescription, cartItems);
+                }
+            }
+
+        } catch (error) {
+            console.error('Error handling prescription order:', error);
+            alert('Có lỗi khi xử lý đơn thuốc: ' + error.message);
+        }
+    };
+
+    // Add this new function to handle direct ordering from prescriptions
+    const createDirectOrder = async (prescription, cartItems) => {
+        try {
+            const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            // Create order data with prescription reference
+            const orderData = {
+                user_email: currentUser.email,
+                items: cartItems.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    category: item.category || 'Thuốc theo đơn'
+                })),
+                customerInfo: {
+                    name: currentUser.name,
+                    email: currentUser.email,
+                    phone: currentUser.phone || '', // You might want to prompt for this
+                    address: currentUser.address || 'Địa chỉ chưa cập nhật', // You might want to prompt for this
+                    city: '',
+                    district: '',
+                    note: `Đơn hàng từ đơn thuốc #${prescription.id} - Bác sĩ: ${prescription.doctor_name || prescription.doctorName}`
+                },
+                paymentMethod: 'cod', // Default to COD for prescription orders
+                totalAmount: totalAmount
+            };
+
+            console.log('Creating direct prescription order:', orderData);
+
+            // Submit order to API
+            const response = await fetch('http://localhost:5000/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(orderData)
             });
 
-            const totalValue = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            alert(`Đã thêm ${cartItems.length} sản phẩm vào giỏ hàng!\nTổng giá trị: ${formatPrice(totalValue)}`);
+            const result = await response.json();
 
-            // Navigate to cart
-            navigate('/cart');
+            if (!response.ok) {
+                throw new Error(result.message || 'Failed to create order');
+            }
+
+            if (result.success) {
+                alert(
+                    `Đặt hàng thành công!\n` +
+                    `Mã đơn hàng: #${result.orderId}\n` +
+                    `Tổng tiền: ${formatPrice(totalAmount)}\n` +
+                    `Bạn sẽ nhận được cuộc gọi xác nhận trong vòng 30 phút.`
+                );
+
+                // Optionally navigate to order history or stay on the same page
+                const viewOrder = confirm('Bạn có muốn xem lịch sử đơn hàng không?');
+                if (viewOrder) {
+                    navigate('/order-history');
+                }
+            } else {
+                throw new Error(result.message || 'Failed to create order');
+            }
+
         } catch (error) {
-            console.error('Error adding prescription to cart:', error);
-            alert('Có lỗi khi thêm đơn thuốc vào giỏ hàng: ' + error.message);
+            console.error('Error creating direct prescription order:', error);
+            alert('Có lỗi khi đặt hàng: ' + error.message);
         }
     };
 
