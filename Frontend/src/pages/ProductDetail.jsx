@@ -352,33 +352,6 @@ const ProductDetail = () => {
                     <p className="text-gray-700">{product.storage || 'Đang cập nhật'}</p>
                   </div>
                 </TabsContent>
-                
-                {/* <TabsContent value="reviews" className="mt-6">
-                  <h3 className="text-lg font-semibold mb-4">Đánh giá từ khách hàng</h3>
-                  <div className="space-y-4">
-                    {[...Array(3)].map((_, index) => (
-                      <div key={index} className="border-b border-gray-200 pb-4">
-                        <div className="flex items-center gap-4 mb-2">
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`w-4 h-4 ${
-                                  i < 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="font-medium">Khách hàng {index + 1}</span>
-                          <span className="text-sm text-gray-500">2 ngày trước</span>
-                        </div>
-                        <p className="text-gray-700">
-                          Sản phẩm chất lượng tốt, giao hàng nhanh chóng. Tôi sẽ mua lại lần sau.
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent> */}
               </Tabs>
             </CardContent>
           </Card>

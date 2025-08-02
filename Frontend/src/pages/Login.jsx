@@ -62,36 +62,6 @@ const Login = () => {
     }
   ];
 
-  // const handleLogin = (e) => {
-  //   e.preventDefault();
-    
-  //   const account = sampleAccounts.find(acc => acc.email === email && acc.password === password);
-    
-  //   if (account) {
-  //     // Store user data with user-specific cart initialization
-  //     const userData = {
-  //       name: account.name,
-  //       email: account.email,
-  //       role: account.role,
-  //       isLoggedIn: true
-  //     };
-      
-  //     localStorage.setItem('user', JSON.stringify(userData));
-      
-  //     // Initialize user-specific cart if it doesn't exist
-  //     const cartKey = `cart_${account.email}`;
-  //     if (!localStorage.getItem(cartKey)) {
-  //       localStorage.setItem(cartKey, JSON.stringify([]));
-  //     }
-      
-  //     console.log(`Đăng nhập thành công với vai trò: ${account.role}`);
-  //     navigate('/');
-  //     window.location.reload();
-  //   } else {
-  //     alert('Email hoặc mật khẩu không đúng!');
-  //   }
-  // };
-
   const handleLogin = async (e) => {
   e.preventDefault();
 
@@ -129,38 +99,6 @@ const Login = () => {
     alert(`Lỗi đăng nhập: ${err.message}`);
   }
 };
-
-
-  // const handleRegister = (e) => {
-  //   e.preventDefault();
-    
-  //   if (password !== confirmPassword) {
-  //     alert('Mật khẩu xác nhận không khớp!');
-  //     return;
-  //   }
-    
-  //   if (!name || !email || !password || !selectedRole) {
-  //     alert('Vui lòng điền đầy đủ thông tin!');
-  //     return;
-  //   }
-    
-  //   const newUser = {
-  //     name,
-  //     email,
-  //     role: selectedRole,
-  //     isLoggedIn: true
-  //   };
-    
-  //   localStorage.setItem('user', JSON.stringify(newUser));
-    
-  //   // Initialize user-specific cart
-  //   const cartKey = `cart_${email}`;
-  //   localStorage.setItem(cartKey, JSON.stringify([]));
-    
-  //   console.log('Đăng ký thành công!');
-  //   navigate('/');
-  //   window.location.reload();
-  // };
 
 const handleRegister = async (e) => {
   e.preventDefault();

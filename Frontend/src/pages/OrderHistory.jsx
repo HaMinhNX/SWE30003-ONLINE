@@ -377,12 +377,6 @@ const OrderHistory = () => {
                 <TabsTrigger value="confirmed">
                   Đã xác nhận ({getOrderCount('confirmed')})
                 </TabsTrigger>
-                {/* <TabsTrigger value="shipping">
-                  Đang giao ({getOrderCount('shipping')})
-                </TabsTrigger>
-                <TabsTrigger value="delivered">
-                  Đã giao ({getOrderCount('delivered')})
-                </TabsTrigger> */}
                 <TabsTrigger value="cancelled">
                   Đã hủy ({getOrderCount('cancelled')})
                 </TabsTrigger>

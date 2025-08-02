@@ -65,10 +65,7 @@ const StoreLocator = () => {
                 <MapPin className="w-16 h-16 text-primary mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Bản đồ cửa hàng</h3>
                 <p className="text-gray-600 mb-6">Xem vị trí các cửa hàng Long Châu gần bạn</p>
-                <Button className="bg-primary hover:bg-primary/90">
-                  <Navigation className="w-4 h-4 mr-2" />
-                  Xem bản đồ chi tiết
-                </Button>
+  
               </div>
             </div>
           </div>
@@ -110,17 +107,7 @@ const StoreLocator = () => {
                     <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
                     <span className="text-sm text-gray-600">Mở cửa: {store.hours}</span>
                   </div>
-                  
-                  <div className="flex gap-2 pt-2">
-                    <Button size="sm" variant="outline" className="flex-1">
-                      <Phone className="w-4 h-4 mr-2" />
-                      Gọi điện
-                    </Button>
-                    <Button size="sm" className="flex-1 bg-primary hover:bg-primary/90">
-                      <Navigation className="w-4 h-4 mr-2" />
-                      Chỉ đường
-                    </Button>
-                  </div>
+
                 </CardContent>
               </Card>
             ))}

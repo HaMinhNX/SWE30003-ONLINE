@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -30,7 +32,7 @@ const Navbar = () => {
       }
     }
 
-    // Update cart count and items - user-specific cart implementation
+    // Update cart count and items - only for customers
     const updateCartData = () => {
       const savedUser = localStorage.getItem('user');
       if (!savedUser) {
@@ -41,7 +43,8 @@ const Navbar = () => {
 
       try {
         const userData = JSON.parse(savedUser);
-        if (userData.isLoggedIn) {
+        // Only load cart data for customers
+        if (userData.isLoggedIn && userData.role === 'Customer') {
           // Use user email as unique identifier for cart
           const cartKey = `cart_${userData.email}`;
           const cart = localStorage.getItem(cartKey);
@@ -81,7 +84,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     // Clear user-specific cart when logging out
-    if (user) {
+    if (user && user.role === 'Customer') {
       const cartKey = `cart_${user.email}`;
       localStorage.removeItem(cartKey);
     }
@@ -127,8 +130,8 @@ const Navbar = () => {
 
           {/* Right side */}
           <div className="flex items-center space-x-4">
-            {/* Cart Icon with Hover - Show for all users */}
-            {user?.isLoggedIn && (
+            {/* Cart Icon with Hover - Only show for customers */}
+            {user?.isLoggedIn && user.role === 'Customer' && (
               <div
                 className="relative"
                 onMouseEnter={() => setShowCartHover(true)}
@@ -213,7 +216,6 @@ const Navbar = () => {
                       </DropdownMenuItem>
                     </>
                   )}
-
 
                   {(user.role === 'Admin' || user.role === 'Manager') && (
                     <DropdownMenuItem asChild>

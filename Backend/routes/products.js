@@ -14,6 +14,8 @@ router.get('/', (req, res) => {
 
 // Get product by ID
 router.get('/:id', (req, res) => {
+
+  
   const { id } = req.params;
   const query = 'SELECT * FROM products WHERE id = ?';
   db.query(query, [id], (err, results) => {
@@ -24,33 +26,55 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const product = req.body;
+  const {
+    name, category, price, stock,
+    images, brand, origin,
+    description, ingredients,
+    usage, storage
+  } = req.body;
+
+  console.log('Incoming product data:', req.body);
+
+  if (!name || !price || !description || !category || !stock) {
+    return res.status(400).json({ success: false, message: 'Missing required fields' });
+  }
+
   const query = `
-    INSERT INTO products 
-    (name, activeIngredient, price, stock, category, form, strength, packaging, uses, shortDescription, detailedDescription, img)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    INSERT INTO products
+      (name, category, price, stock,
+       images, brand, origin,
+       description, ingredients,
+       \`usage\`, storage)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
 
   const values = [
-    product.name,
-    product.activeIngredient,
-    product.price,
-    product.stock,
-    product.category,
-    product.form,
-    product.strength,
-    product.packaging,
-    product.uses,
-    product.shortDescription,
-    product.detailedDescription,
-    product.img
+    name, category, price, stock,
+    images, brand, origin,
+    description, ingredients,
+    usage, storage
   ];
 
+
+  console.log('📝 Running SQL:', query.trim());
+  console.log('📝 With values:', values);
+
   db.query(query, values, (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ id: result.insertId, ...product });
+    if (err) {
+      console.error('❌ products.POST error:', err);
+      return res.status(500).json({ error: err.message });
+    } 
+      
+    // return the new row
+    res.json({
+      id: result.insertId,
+      name, category, price, stock,
+      images, brand, origin,
+      description, ingredients,
+      usage, storage
+    });
   });
 });
-
 
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
@@ -63,30 +87,30 @@ router.delete('/:id', (req, res) => {
 
 router.put('/:id', (req, res) => {
   const { id } = req.params;
-  const product = req.body;
+  const {
+    name, category, price, stock,
+    images, brand, origin,
+    description, ingredients,
+    usage, storage
+  } = req.body;
 
   const query = `
-    UPDATE products SET 
-    name=?, activeIngredient=?, price=?, stock=?, category=?, form=?, strength=?, packaging=?, uses=?, shortDescription=?, detailedDescription=?, img=?
-    WHERE id = ?`;
-
+    UPDATE products SET
+      name=?, category=?, price=?, stock=?,
+      images=?, brand=?, origin=?,
+      description=?, ingredients=?,
+      \`usage\`=?, storage=?
+    WHERE id = ?
+  `;
   const values = [
-    product.name,
-    product.activeIngredient,
-    product.price,
-    product.stock,
-    product.category,
-    product.form,
-    product.strength,
-    product.packaging,
-    product.uses,
-    product.shortDescription,
-    product.detailedDescription,
-    product.img,
+    name, category, price, stock,
+    images, brand, origin,
+    description, ingredients,
+    usage, storage,
     id
   ];
 
-  db.query(query, values, (err, result) => {
+  db.query(query, values, (err) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ success: true });
   });

@@ -8,14 +8,14 @@ import { Badge } from '../components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Textarea } from '../components/ui/textarea';
-import { 
-  Package, 
-  Store, 
-  Users, 
-  BarChart3, 
-  Plus, 
-  Edit, 
-  Trash2, 
+import {
+  Package,
+  Store,
+  Users,
+  BarChart3,
+  Plus,
+  Edit,
+  Trash2,
   ArrowLeft,
   DollarSign,
   TrendingUp,
@@ -29,7 +29,7 @@ import Footer from '../components/Footer';
 
 const Management = () => {
   // State for managing data
-  
+
   const [products, setProducts] = useState([]);
   const [stores, setStores] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -37,51 +37,51 @@ const Management = () => {
 
   useEffect(() => {
     fetch('http://localhost:5000/api/products')
-    .then(res => res.json())
-    .then(data => setProducts(data))
-    .catch(err => {
-      console.error('Lỗi tải sản phẩm:', err);
-      alert('Không thể tải sản phẩm');
-    });
+      .then(res => res.json())
+      .then(data => setProducts(data))
+      .catch(err => {
+        console.error('Lỗi tải sản phẩm:', err);
+        alert('Không thể tải sản phẩm');
+      });
 
     fetch('http://localhost:5000/api/stores')
-    .then(res => res.json())
-    .then(data => setStores(data))
-    .catch(err => {
-      console.error('Lỗi tải cửa hàng:', err);
-      alert('Không thể tải cửa hàng');
-    });
+      .then(res => res.json())
+      .then(data => setStores(data))
+      .catch(err => {
+        console.error('Lỗi tải cửa hàng:', err);
+        alert('Không thể tải cửa hàng');
+      });
 
     fetch('http://localhost:5000/api/employees')
-    .then(res => res.json())
-    .then(data => setEmployees(data))
-    .catch(err => {
-      console.error('Lỗi tải nhân viên:', err);
-      alert('Không thể tải nhân viên');
-    });
+      .then(res => res.json())
+      .then(data => setEmployees(data))
+      .catch(err => {
+        console.error('Lỗi tải nhân viên:', err);
+        alert('Không thể tải nhân viên');
+      });
   }, []);
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  Promise.all([
-    fetch('http://localhost:5000/api/products'),
-    fetch('http://localhost:5000/api/stores'),
-    fetch('http://localhost:5000/api/employees')
-  ])
-  .then(([productsRes, storesRes, employeesRes]) => Promise.all([productsRes.json(), storesRes.json(), employeesRes.json()]))
-  .then(([productsData, storesData, employeesData]) => {
-    setProducts(productsData);
-    setStores(storesData);
-    setEmployees(employeesData);
-    setLoading(false);  // Khi dữ liệu đã tải xong, set loading = false
-  })
-  .catch(err => {
-    console.error('Lỗi tải dữ liệu:', err);
-    alert('Không thể tải dữ liệu');
-    setLoading(false);
-  });
-}, []);
+    Promise.all([
+      fetch('http://localhost:5000/api/products'),
+      fetch('http://localhost:5000/api/stores'),
+      fetch('http://localhost:5000/api/employees')
+    ])
+      .then(([productsRes, storesRes, employeesRes]) => Promise.all([productsRes.json(), storesRes.json(), employeesRes.json()]))
+      .then(([productsData, storesData, employeesData]) => {
+        setProducts(productsData);
+        setStores(storesData);
+        setEmployees(employeesData);
+        setLoading(false);  // Khi dữ liệu đã tải xong, set loading = false
+      })
+      .catch(err => {
+        console.error('Lỗi tải dữ liệu:', err);
+        alert('Không thể tải dữ liệu');
+        setLoading(false);
+      });
+  }, []);
 
 
 
@@ -104,17 +104,16 @@ const Management = () => {
   // Enhanced form state for products with all required fields
   const [newProduct, setNewProduct] = useState({
     name: '',
-    activeIngredient: '',
+    category: '',
     price: '',
     stock: '',
-    category: '',
-    form: '',
-    strength: '',
-    packaging: '',
-    uses: '',
-    shortDescription: '',
-    detailedDescription: '',
-    img: ''
+    images: '',
+    brand: '',
+    origin: '',
+    description: '',
+    ingredients: '',
+    usage: '',
+    storage: ''
   });
 
   const [newStore, setNewStore] = useState({
@@ -138,79 +137,70 @@ const Management = () => {
   };
   // Enhanced add product function with validation
   const handleAddProduct = () => {
-    // Validate required fields
-    const requiredFields = ['name', 'activeIngredient', 'price', 'stock', 'category', 'form', 'strength', 'packaging', 'uses', 'shortDescription', 'detailedDescription'];
-    const missingFields = requiredFields.filter(field => !newProduct[field]);
-
-    if (missingFields.length > 0) {
-      alert(`Vui lòng điền đầy đủ các trường: ${missingFields.join(', ')}`);
-      return;
+    // Required: name, price, stock
+    const missing = ['name', 'price', 'stock'].filter(f => !newProduct[f]);
+    if (missing.length) {
+      return alert(`Vui lòng điền: ${missing.join(', ')}`);
     }
 
-    // Validate numeric fields
-    const price = parseInt(newProduct.price);
-    const stock = parseInt(newProduct.stock);
-
+    // Numeric validation
+    const price = parseFloat(newProduct.price);
+    const stock = parseInt(newProduct.stock, 10);
     if (isNaN(price) || price <= 0) {
-      alert('Giá sản phẩm phải là số dương');
-      return;
+      return alert('Giá phải là số dương');
     }
-
     if (isNaN(stock) || stock < 0) {
-      alert('Số lượng tồn kho phải là số không âm');
-      return;
+      return alert('Tồn kho phải ≥ 0');
     }
 
-    const product = {
-      id: `P${Date.now()}`,
-      name: newProduct.name,
-      activeIngredient: newProduct.activeIngredient,
-      price: price,
-      stock: stock,
-      category: newProduct.category,
-      form: newProduct.form,
-      strength: newProduct.strength,
-      packaging: newProduct.packaging,
-      uses: newProduct.uses,
-      shortDescription: newProduct.shortDescription,
-      detailedDescription: newProduct.detailedDescription,
-      img: newProduct.img || `https://dummyimage.com/200x200/cccccc/000000&text=${encodeURIComponent(newProduct.name)}`
-    };
     fetch('http://localhost:5000/api/products', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(product)
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...newProduct, price, stock })
     })
-    .then(res => res.json())
-    .then(added => {
-    setProducts(prev => [...prev, added]);
-    setNewProduct({ name: '', activeIngredient: '', price: '', stock: '', category: '', form: '', strength: '', packaging: '', uses: '', shortDescription: '', detailedDescription: '', img: '' });
-    setIsAddProductOpen(false);
-    alert('Đã thêm sản phẩm thành công!');
-    })
-    .catch(() => alert('Không thể thêm sản phẩm'));
+      .then(res => res.json())
+      .then(added => {
+        setProducts(prev => [...prev, added]);
+        setNewProduct({
+          name: '',
+          category: '',
+          price: '',
+          stock: '',
+          images: '',
+          brand: '',
+          origin: '',
+          description: '',
+          ingredients: '',
+          usage: '',
+          storage: ''
+        });
+        setIsAddProductOpen(false);
+        alert('Đã thêm sản phẩm thành công');
+      })
+      .catch(() => alert('Không thể thêm sản phẩm'));
   };
 
-  const handleAddStore = () => {
-  if (!newStore.name || !newStore.manager || !newStore.address) {
-    alert('Vui lòng nhập đầy đủ thông tin cửa hàng');
-    return;
-  }
 
-  fetch('http://localhost:5000/api/stores', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(newStore)
-  })
-  .then(res => res.json())
-  .then(added => {
-    setStores(prev => [...prev, added]);
-    setNewStore({ name: '', manager: '', address: '' });
-    setIsAddStoreOpen(false);
-    alert('Đã thêm cửa hàng thành công');
-  })
-  .catch(() => alert('Không thể thêm cửa hàng'));
-};
+  const handleAddStore = () => {
+    if (!newStore.name || !newStore.manager || !newStore.address) {
+      alert('Vui lòng nhập đầy đủ thông tin cửa hàng');
+      return;
+    }
+
+    fetch('http://localhost:5000/api/stores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newStore)
+    })
+      .then(res => res.json())
+      .then(added => {
+        setStores(prev => [...prev, added]);
+        setNewStore({ name: '', manager: '', address: '' });
+        setIsAddStoreOpen(false);
+        alert('Đã thêm cửa hàng thành công');
+      })
+      .catch(() => alert('Không thể thêm cửa hàng'));
+  };
 
 
   const handleAddEmployee = () => {
@@ -224,26 +214,26 @@ const Management = () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newEmployee)
     })
-    .then(res => res.json())
-    .then(added => {
-      setEmployees(prev => [...prev, added]);
-      setNewEmployee({ name: '', role: '', store: '', email: '' });
-      setIsAddEmployeeOpen(false);
-      alert('Đã thêm nhân viên thành công');
-    })
-    .catch(() => alert('Không thể thêm nhân viên'));
+      .then(res => res.json())
+      .then(added => {
+        setEmployees(prev => [...prev, added]);
+        setNewEmployee({ name: '', role: '', store: '', email: '' });
+        setIsAddEmployeeOpen(false);
+        alert('Đã thêm nhân viên thành công');
+      })
+      .catch(() => alert('Không thể thêm nhân viên'));
   };
-  
+
 
   // Delete functions
   const deleteProduct = (id) => {
     if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
     fetch(`http://localhost:5000/api/products/${id}`, { method: 'DELETE' })
-    .then(res => {
-      if (!res.ok) throw new Error();
-      setProducts(prev => prev.filter(p => p.id !== id));
-    })
-    .catch(() => alert('Không thể xoá sản phẩm'));
+      .then(res => {
+        if (!res.ok) throw new Error();
+        setProducts(prev => prev.filter(p => p.id !== id));
+      })
+      .catch(() => alert('Không thể xoá sản phẩm'));
   };
 
 
@@ -254,7 +244,7 @@ const Management = () => {
   };
 
 
-    const deleteStore = (id) => {
+  const deleteStore = (id) => {
     if (!confirm('Bạn có chắc muốn xóa cửa hàng này?')) return;
     fetch(`http://localhost:5000/api/stores/${id}`, { method: 'DELETE' })
       .then(res => {
@@ -331,7 +321,7 @@ const Management = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
@@ -421,52 +411,33 @@ const Management = () => {
                         Thêm sản phẩm
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white">
+                    <DialogContent className="w-full max-w-xl sm:max-w-lg h-[80vh] overflow-y-auto p-6">
                       <DialogHeader>
                         <DialogTitle>Thêm sản phẩm mới</DialogTitle>
                       </DialogHeader>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-4">
+                        {/* Name */}
                         <div>
-                          <Label htmlFor="productName">Tên sản phẩm *</Label>
+                          <Label htmlFor="name">Tên sản phẩm *</Label>
                           <Input
-                            id="productName"
+                            id="name"
                             value={newProduct.name}
-                            onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                            onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
                             placeholder="Nhập tên sản phẩm"
                           />
                         </div>
+
+                        {/* Category */}
                         <div>
-                          <Label htmlFor="activeIngredient">Hoạt chất *</Label>
-                          <Input
-                            id="activeIngredient"
-                            value={newProduct.activeIngredient}
-                            onChange={(e) => setNewProduct({...newProduct, activeIngredient: e.target.value})}
-                            placeholder="Nhập hoạt chất"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="productPrice">Giá (VND) *</Label>
-                          <Input
-                            id="productPrice"
-                            type="number"
-                            value={newProduct.price}
-                            onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
-                            placeholder="Nhập giá sản phẩm"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="productStock">Số lượng tồn kho *</Label>
-                          <Input
-                            id="productStock"
-                            type="number"
-                            value={newProduct.stock}
-                            onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
-                            placeholder="Nhập số lượng"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="productCategory">Danh mục *</Label>
-                          <Select value={newProduct.category} onValueChange={(value) => setNewProduct({...newProduct, category: value})}>
+                          <Label htmlFor="category">Danh mục</Label>
+                          {/* <Input
+                            id="category"
+                            value={newProduct.category}
+                            onChange={e => setNewProduct({ ...newProduct, category: e.target.value })}
+                            placeholder="Ví dụ: Thuốc giảm đau"
+                          /> */}
+
+                          <Select value={newProduct.category} onValueChange={(value) => setNewProduct({ ...newProduct, category: value })}>
                             <SelectTrigger>
                               <SelectValue placeholder="Chọn danh mục" />
                             </SelectTrigger>
@@ -479,81 +450,109 @@ const Management = () => {
                             </SelectContent>
                           </Select>
                         </div>
+
+                        {/* Price & Stock */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="price">Giá (VND) *</Label>
+                            <Input
+                              id="price"
+                              type="number"
+                              value={newProduct.price}
+                              onChange={e => setNewProduct({ ...newProduct, price: e.target.value })}
+                              placeholder="Nhập giá"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="stock">Tồn kho *</Label>
+                            <Input
+                              id="stock"
+                              type="number"
+                              value={newProduct.stock}
+                              onChange={e => setNewProduct({ ...newProduct, stock: e.target.value })}
+                              placeholder="Nhập số lượng"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Images URL */}
                         <div>
-                          <Label htmlFor="productForm">Dạng bào chế *</Label>
+                          <Label htmlFor="images">URL hình ảnh</Label>
                           <Input
-                            id="productForm"
-                            value={newProduct.form}
-                            onChange={(e) => setNewProduct({...newProduct, form: e.target.value})}
-                            placeholder="VD: Viên nén, Viên sủi"
+                            id="images"
+                            value={newProduct.images}
+                            onChange={e => setNewProduct({ ...newProduct, images: e.target.value })}
+                            placeholder="https://example.com/img.jpg"
                           />
                         </div>
+
+                        {/* Brand, Origin */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="brand">Thương hiệu</Label>
+                            <Input
+                              id="brand"
+                              value={newProduct.brand}
+                              onChange={e => setNewProduct({ ...newProduct, brand: e.target.value })}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="origin">Xuất xứ</Label>
+                            <Input
+                              id="origin"
+                              value={newProduct.origin}
+                              onChange={e => setNewProduct({ ...newProduct, origin: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Descriptions */}
                         <div>
-                          <Label htmlFor="productStrength">Hàm lượng *</Label>
-                          <Input
-                            id="productStrength"
-                            value={newProduct.strength}
-                            onChange={(e) => setNewProduct({...newProduct, strength: e.target.value})}
-                            placeholder="VD: 500mg, 1000mg"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="productPackaging">Quy cách đóng gói *</Label>
-                          <Input
-                            id="productPackaging"
-                            value={newProduct.packaging}
-                            onChange={(e) => setNewProduct({...newProduct, packaging: e.target.value})}
-                            placeholder="VD: Hộp 10 vỉ x 10 viên"
-                          />
-                        </div>
-                        <div className="col-span-2">
-                          <Label htmlFor="productUses">Công dụng *</Label>
-                          <Input
-                            id="productUses"
-                            value={newProduct.uses}
-                            onChange={(e) => setNewProduct({...newProduct, uses: e.target.value})}
-                            placeholder="Nhập công dụng chính"
-                          />
-                        </div>
-                        <div className="col-span-2">
-                          <Label htmlFor="productShortDesc">Mô tả ngắn *</Label>
-                          <Input
-                            id="productShortDesc"
-                            value={newProduct.shortDescription}
-                            onChange={(e) => setNewProduct({...newProduct, shortDescription: e.target.value})}
-                            placeholder="Mô tả ngắn gọn về sản phẩm"
-                          />
-                        </div>
-                        <div className="col-span-2">
-                          <Label htmlFor="productDetailedDesc">Mô tả chi tiết *</Label>
+                          <Label htmlFor="description">Mô tả</Label>
                           <Textarea
-                            id="productDetailedDesc"
-                            value={newProduct.detailedDescription}
-                            onChange={(e) => setNewProduct({...newProduct, detailedDescription: e.target.value})}
-                            placeholder="Mô tả chi tiết về sản phẩm, cách sử dụng..."
-                            rows={3}
+                            id="description"
+                            rows={2}
+                            value={newProduct.description}
+                            onChange={e => setNewProduct({ ...newProduct, description: e.target.value })}
                           />
                         </div>
-                        <div className="col-span-2">
-                          <Label htmlFor="productImg">URL hình ảnh</Label>
-                          <Input
-                            id="productImg"
-                            value={newProduct.img}
-                            onChange={(e) => setNewProduct({...newProduct, img: e.target.value})}
-                            placeholder="https://example.com/image.jpg"
+                        <div>
+                          <Label htmlFor="ingredients">Thành phần</Label>
+                          <Textarea
+                            id="ingredients"
+                            rows={2}
+                            value={newProduct.ingredients}
+                            onChange={e => setNewProduct({ ...newProduct, ingredients: e.target.value })}
                           />
                         </div>
-                        <div className="col-span-2">
-                          <Button onClick={handleAddProduct} className="w-full">
-                            Thêm sản phẩm
-                          </Button>
+                        <div>
+                          <Label htmlFor="usage">Cách dùng</Label>
+                          <Textarea
+                            id="usage"
+                            rows={2}
+                            value={newProduct.usage}
+                            onChange={e => setNewProduct({ ...newProduct, usage: e.target.value })}
+                          />
                         </div>
+                        <div>
+                          <Label htmlFor="storage">Bảo quản</Label>
+                          <Textarea
+                            id="storage"
+                            rows={2}
+                            value={newProduct.storage}
+                            onChange={e => setNewProduct({ ...newProduct, storage: e.target.value })}
+                          />
+                        </div>
+
+                        {/* Submit */}
+                        <Button onClick={handleAddProduct} className="w-full">
+                          Thêm sản phẩm
+                        </Button>
                       </div>
                     </DialogContent>
                   </Dialog>
                 </div>
               </CardHeader>
-              < >
                 <div className="space-y-4">
                   {products.map((product) => (
                     <div
@@ -562,7 +561,7 @@ const Management = () => {
                     >
                       <div className="flex items-center gap-4">
                         <img
-                          src={product.img}
+                          src={product.images}
                           alt={product.name}
                           className="w-16 h-16 object-cover rounded-lg"
                           onError={(e) => {
@@ -600,41 +599,41 @@ const Management = () => {
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Dialog open={isEditProductOpen} onOpenChange={setIsEditProductOpen}>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Sửa sản phẩm</DialogTitle>
-                              </DialogHeader>
-                              <form onSubmit={(e) => {
-                                e.preventDefault();
-                                updateProduct(editingProduct);
-                              }}>
-                                <div className="space-y-4">
-                                  <div>
-                                    <Label htmlFor="productName">Tên sản phẩm</Label>
-                                    <Input
-                                      id="productName"
-                                      value={editingProduct?.name || ''}
-                                      onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                                      placeholder="Nhập tên sản phẩm"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="productPrice">Giá</Label>
-                                    <Input
-                                      id="productPrice"
-                                      type="number"
-                                      value={editingProduct?.price || ''}
-                                      onChange={(e) => setEditingProduct({ ...editingProduct, price: e.target.value })}
-                                      placeholder="Nhập giá sản phẩm"
-                                    />
-                                  </div>
-                                  <Button type="submit" className="w-full">
-                                    Cập nhật sản phẩm
-                                  </Button>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Sửa sản phẩm</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={(e) => {
+                              e.preventDefault();
+                              updateProduct(editingProduct);
+                            }}>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label htmlFor="productName">Tên sản phẩm</Label>
+                                  <Input
+                                    id="productName"
+                                    value={editingProduct?.name || ''}
+                                    onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                                    placeholder="Nhập tên sản phẩm"
+                                  />
                                 </div>
-                              </form>
-                            </DialogContent>
-                          </Dialog>
+                                <div>
+                                  <Label htmlFor="productPrice">Giá</Label>
+                                  <Input
+                                    id="productPrice"
+                                    type="number"
+                                    value={editingProduct?.price || ''}
+                                    onChange={(e) => setEditingProduct({ ...editingProduct, price: e.target.value })}
+                                    placeholder="Nhập giá sản phẩm"
+                                  />
+                                </div>
+                                <Button type="submit" className="w-full">
+                                  Cập nhật sản phẩm
+                                </Button>
+                              </div>
+                            </form>
+                          </DialogContent>
+                        </Dialog>
                         <Button
                           variant="outline"
                           size="sm"
@@ -648,9 +647,8 @@ const Management = () => {
                     </div>
                   ))}
                 </div>
-              </  >
             </Card>
-            
+
           </TabsContent>
 
           <TabsContent value="stores">
@@ -678,7 +676,7 @@ const Management = () => {
                           <Input
                             id="storeName"
                             value={newStore.name}
-                            onChange={(e) => setNewStore({...newStore, name: e.target.value})}
+                            onChange={(e) => setNewStore({ ...newStore, name: e.target.value })}
                             placeholder="Nhập tên cửa hàng"
                           />
                         </div>
@@ -687,7 +685,7 @@ const Management = () => {
                           <Input
                             id="storeManager"
                             value={newStore.manager}
-                            onChange={(e) => setNewStore({...newStore, manager: e.target.value})}
+                            onChange={(e) => setNewStore({ ...newStore, manager: e.target.value })}
                             placeholder="Nhập tên quản lý"
                           />
                         </div>
@@ -696,7 +694,7 @@ const Management = () => {
                           <Input
                             id="storeAddress"
                             value={newStore.address}
-                            onChange={(e) => setNewStore({...newStore, address: e.target.value})}
+                            onChange={(e) => setNewStore({ ...newStore, address: e.target.value })}
                             placeholder="Nhập địa chỉ cửa hàng"
                           />
                         </div>
@@ -730,7 +728,7 @@ const Management = () => {
                             Xem chi tiết
                           </Link>
                         </Button>
-                        
+
                         {/* Nút sửa cửa hàng */}
                         <Button
                           variant="outline"
@@ -744,49 +742,49 @@ const Management = () => {
                           Sửa
                         </Button>
                         <Dialog open={isEditStoreOpen} onOpenChange={setIsEditStoreOpen}>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Sửa cửa hàng</DialogTitle>
-                              </DialogHeader>
-                              <form onSubmit={(e) => {
-                                e.preventDefault();
-                                updateStore(editingStore); // Gọi hàm updateStore khi submit form sửa
-                              }}>
-                                <div className="space-y-4">
-                                  <div>
-                                    <Label htmlFor="storeName">Tên cửa hàng</Label>
-                                    <Input
-                                      id="storeName"
-                                      value={editingStore?.name || ''}
-                                      onChange={(e) => setEditingStore({ ...editingStore, name: e.target.value })}
-                                      placeholder="Nhập tên cửa hàng"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="storeManager">Quản lý cửa hàng</Label>
-                                    <Input
-                                      id="storeManager"
-                                      value={editingStore?.manager || ''}
-                                      onChange={(e) => setEditingStore({ ...editingStore, manager: e.target.value })}
-                                      placeholder="Nhập tên quản lý"
-                                    />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="storeAddress">Địa chỉ cửa hàng</Label>
-                                    <Input
-                                      id="storeAddress"
-                                      value={editingStore?.address || ''}
-                                      onChange={(e) => setEditingStore({ ...editingStore, address: e.target.value })}
-                                      placeholder="Nhập địa chỉ cửa hàng"
-                                    />
-                                  </div>
-                                  <Button type="submit" className="w-full">
-                                    Cập nhật cửa hàng
-                                  </Button>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Sửa cửa hàng</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={(e) => {
+                              e.preventDefault();
+                              updateStore(editingStore); // Gọi hàm updateStore khi submit form sửa
+                            }}>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label htmlFor="storeName">Tên cửa hàng</Label>
+                                  <Input
+                                    id="storeName"
+                                    value={editingStore?.name || ''}
+                                    onChange={(e) => setEditingStore({ ...editingStore, name: e.target.value })}
+                                    placeholder="Nhập tên cửa hàng"
+                                  />
                                 </div>
-                              </form>
-                            </DialogContent>
-                          </Dialog>
+                                <div>
+                                  <Label htmlFor="storeManager">Quản lý cửa hàng</Label>
+                                  <Input
+                                    id="storeManager"
+                                    value={editingStore?.manager || ''}
+                                    onChange={(e) => setEditingStore({ ...editingStore, manager: e.target.value })}
+                                    placeholder="Nhập tên quản lý"
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor="storeAddress">Địa chỉ cửa hàng</Label>
+                                  <Input
+                                    id="storeAddress"
+                                    value={editingStore?.address || ''}
+                                    onChange={(e) => setEditingStore({ ...editingStore, address: e.target.value })}
+                                    placeholder="Nhập địa chỉ cửa hàng"
+                                  />
+                                </div>
+                                <Button type="submit" className="w-full">
+                                  Cập nhật cửa hàng
+                                </Button>
+                              </div>
+                            </form>
+                          </DialogContent>
+                        </Dialog>
                         {/* Nút xoá cửa hàng */}
                         <Button
                           variant="outline"
@@ -804,7 +802,7 @@ const Management = () => {
               </CardContent>
 
             </Card>
-            
+
           </TabsContent>
 
           <TabsContent value="employees">
@@ -832,13 +830,13 @@ const Management = () => {
                           <Input
                             id="employeeName"
                             value={newEmployee.name}
-                            onChange={(e) => setNewEmployee({...newEmployee, name: e.target.value})}
+                            onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
                             placeholder="Nhập tên nhân viên"
                           />
                         </div>
                         <div>
                           <Label htmlFor="employeeRole">Vai trò</Label>
-                          <Select value={newEmployee.role} onValueChange={(value) => setNewEmployee({...newEmployee, role: value})}>
+                          <Select value={newEmployee.role} onValueChange={(value) => setNewEmployee({ ...newEmployee, role: value })}>
                             <SelectTrigger>
                               <SelectValue placeholder="Chọn vai trò" />
                             </SelectTrigger>
@@ -851,7 +849,7 @@ const Management = () => {
                         </div>
                         <div>
                           <Label htmlFor="employeeStore">Cửa hàng</Label>
-                          <Select value={newEmployee.store} onValueChange={(value) => setNewEmployee({...newEmployee, store: value})}>
+                          <Select value={newEmployee.store} onValueChange={(value) => setNewEmployee({ ...newEmployee, store: value })}>
                             <SelectTrigger>
                               <SelectValue placeholder="Chọn cửa hàng" />
                             </SelectTrigger>
@@ -870,7 +868,7 @@ const Management = () => {
                             id="employeeEmail"
                             type="email"
                             value={newEmployee.email}
-                            onChange={(e) => setNewEmployee({...newEmployee, email: e.target.value})}
+                            onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
                             placeholder="Nhập email"
                           />
                         </div>
@@ -988,7 +986,7 @@ const Management = () => {
                 </div>
               </CardContent>
             </Card>
-            
+
           </TabsContent>
 
           <TabsContent value="reports">
@@ -1004,7 +1002,7 @@ const Management = () => {
                   <div className="space-y-4">
                     {stores.map((store) => (
                       <div key={store.id} className="flex items-center justify-between">
-                        <Link 
+                        <Link
                           to={`/store-detail/${store.id}`}
                           className="font-medium hover:text-primary cursor-pointer"
                         >
